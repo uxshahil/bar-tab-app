@@ -1,11 +1,27 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const { activeError } = storeToRefs(useErrorStore())
+const errorStore = useErrorStore()
+
+onErrorCaptured((error) => {
+  errorStore.setError({ error })
+  return false
+})
+
+onMounted(() => {
+  useAuthStore().trackAuthChanges()
+})
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <AuthLayout>
+    <AppErrorPage v-if="activeError" />
+    <RouterView v-slot="{ Component, route }">
+      <Suspense v-if="Component" :timeout="0">
+        <Component :is="Component" :key="route.name">hi</Component>
+        <template #fallback>
+          <span>Loading ..</span>
+        </template>
+      </Suspense>
+    </RouterView>
+  </AuthLayout>
 </template>
-
-<style scoped></style>

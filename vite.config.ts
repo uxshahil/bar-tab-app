@@ -1,18 +1,61 @@
 import { fileURLToPath, URL } from 'node:url'
+import VueRouter from 'unplugin-vue-router/vite'
+import { VueRouterAutoImports } from 'unplugin-vue-router'
 
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
-    vueDevTools(),
+    VueRouter(),
+    Components(),
+    AutoImport({
+      // targets to transform
+      include: [
+        /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
+        /\.vue$/,
+        /\.vue\?vue/, // .vue
+        /\.vue\.[tj]sx?\?vue/, // .vue (vue-loader with experimentalInlineMatchResource enabled)
+        /\.md$/ // .md
+      ],
+
+      // global imports to register
+      imports: [
+        // presets
+        'vue',
+        VueRouterAutoImports,
+        { pinia: ['defineStore', 'storeToRefs', 'acceptHMRUpdate'] }
+      ],
+
+      // Filepath to generate corresponding .d.ts file.
+      // Defaults to './auto-imports.d.ts' when `typescript` is installed locally.
+      // Set `false` to disable.
+      dts: true,
+
+      // Include auto-imported packages in Vite's `optimizeDeps` options
+      // Recommend to enable
+      viteOptimizeDeps: true,
+
+      dirs: ['./src/stores/**', 'src/composables/**', 'src/enums/**']
+    }),
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: element => element.startsWith('iconify-icon')
+        }
+      }
+    }),
+    tailwindcss(),
+    vueDevTools()
   ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    },
-  },
+    }
+  }
 })
