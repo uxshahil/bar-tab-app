@@ -58,9 +58,9 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/drinks/[slug] copy': RouteRecordInfo<
-      '/drinks/[slug] copy',
-      '/drinks/:slug%20copy',
+    '/drinks/[slug]': RouteRecordInfo<
+      '/drinks/[slug]',
+      '/drinks/:slug',
       { slug: ParamValue<true> },
       { slug: ParamValue<false> },
       | never
@@ -98,6 +98,20 @@ declare module 'vue-router/auto-routes' {
       '/register',
       Record<never, never>,
       Record<never, never>,
+      | never
+    >,
+    '/users/': RouteRecordInfo<
+      '/users/',
+      '/users',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/users/[username]': RouteRecordInfo<
+      '/users/[username]',
+      '/users/:username',
+      { username: ParamValue<true> },
+      { username: ParamValue<false> },
       | never
     >,
   }
@@ -143,9 +157,9 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/pages/drinks/[slug] copy.vue': {
+    'src/pages/drinks/[slug].vue': {
       routes:
-        | '/drinks/[slug] copy'
+        | '/drinks/[slug]'
       views:
         | never
     }
@@ -176,6 +190,18 @@ declare module 'vue-router/auto-routes' {
     'src/pages/register.vue': {
       routes:
         | '/register'
+      views:
+        | never
+    }
+    'src/pages/users/index.vue': {
+      routes:
+        | '/users/'
+      views:
+        | never
+    }
+    'src/pages/users/[username].vue': {
+      routes:
+        | '/users/[username]'
       views:
         | never
     }

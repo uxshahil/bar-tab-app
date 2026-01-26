@@ -17,7 +17,7 @@ provide(menuKey, {
 <template>
   <div>
     <Sidebar @taskClicked="taskSheetOpen = true" />
-    <AppNewTask v-model="taskSheetOpen" />
+    <!-- <AppNewTask v-model="taskSheetOpen" /> -->
 
     <div
       class="flex flex-col transition-[margin]"

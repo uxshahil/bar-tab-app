@@ -6,7 +6,6 @@ CREATE TABLE public.bar(
   name text UNIQUE NOT NULL,
   slug text UNIQUE NOT NULL,
   thumb_url text NULL,
-  menus text ARRAY DEFAULT ARRAY[]::varchar[] NOT NULL,
   CONSTRAINT bar_pkey PRIMARY KEY (id)
 );
 

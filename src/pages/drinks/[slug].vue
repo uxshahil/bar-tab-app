@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import { menuQuery } from '@/services/supabase/queries'
-import type { Menu } from '@/services/supabase/queries'
+import { drinkQuery } from '@/services/supabase/queries'
+import type { Drink } from '@/services/supabase/queries'
 
-const userRouteWithIdParam = useRoute('/menus/[slug]')
+const userRoute = useRoute('/drinks/[slug]')
 
-const menu = ref<Menu | null>(null)
+const drink = ref<Drink | null>(null)
 
 watch(
-  () => menu.value?.name,
+  () => drink.value?.name,
   () => {
-    usePageStore().pageData.title = `Menu: ${menu.value?.name || ''}`
+    usePageStore().pageData.title = `Drink: ${drink.value?.name || ''}`
   },
 )
 
-const getMenu = async () => {
-  const { data, error, status } = await menuQuery(userRouteWithIdParam.params?.slug)
+const getDrink = async () => {
+  const { data, error, status } = await drinkQuery(userRoute?.params?.slug)
 
   if (error) useErrorStore().setError({ error, customCode: status })
 
-  menu.value = data
+  drink.value = data
 }
 
-await getMenu()
+await getDrink()
 </script>
 
 <template>

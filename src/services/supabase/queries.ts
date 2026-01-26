@@ -6,13 +6,22 @@ export const profileQuery = ({ column, value }: { column: string; value: string 
 
 export type Profile = QueryData<ReturnType<typeof profileQuery>>
 
-export const profilesQuery = supabase.from('profile').select(`id, full_name`)
+export const profilesQuery = () => supabase.from('profile').select(`id, username, full_name, user_role`)
+export type Profiles = QueryData<ReturnType<typeof profilesQuery>>
+
+export const updateUserQuery = (updatedUser = {} as Partial<Profile>, id: string) => {
+  return supabase.from('profile').update(updatedUser).eq('id', id)
+}
 
 export const groupedProfilesQuery = (userIds: string[]) =>
   supabase.from('profile').select('username, avatar_url, id, full_name').in('id', userIds)
 export type Collabs = QueryData<ReturnType<typeof groupedProfilesQuery>>
 
-export const barsQuery = supabase.from('bar').select('*')
+export const barsQuery = supabase
+  .from('bar')
+  .select(`*, bar_menu(*)`)
+
+console.log('barsQuery', await barsQuery)
 export type Bars = QueryData<typeof barsQuery>
 export const barQuery = (slug: string) => supabase.from('bar').select(`*`).eq('slug', slug).single()
 export type Bar = QueryData<ReturnType<typeof barQuery>>
@@ -32,8 +41,8 @@ export const drinksQuery = supabase
   .from('menu_item')
   .select('id, name, slug, price, category (name, slug, menu (name, slug))')
 export type Drinks = QueryData<typeof drinksQuery>
-export const drinkQuery = (id: number) =>
-  supabase.from('menu_item').select(`*`).eq('id', id).single()
+export const drinkQuery = (slug: string) =>
+  supabase.from('menu_item').select(`*`).eq('slug', slug).single()
 export type Drink = QueryData<ReturnType<typeof drinkQuery>>
 
 // export const tasksWithProjectsQuery = supabase.from('tasks').select(`

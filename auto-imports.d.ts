@@ -70,12 +70,13 @@ declare global {
   const useMeta: typeof import('vue-meta').useMeta
   const useModel: typeof import('vue').useModel
   const usePageStore: typeof import('./src/stores/page').usePageStore
-  const useProjectsStore: typeof import('./src/stores/loaders/projects').useProjectsStore
+  const useProjectsStore: typeof import('./src/stores/loaders/users').useProjectsStore
   const useRoute: typeof import('vue-router').useRoute
   const useRouter: typeof import('vue-router').useRouter
   const useSlots: typeof import('vue').useSlots
   const useTasksStore: typeof import('./src/stores/loaders/tasks').useTasksStore
   const useTemplateRef: typeof import('vue').useTemplateRef
+  const useUsersStore: typeof import('./src/stores/loaders/users').useUsersStore
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect

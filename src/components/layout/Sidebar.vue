@@ -9,31 +9,44 @@ const links = [
     to: '/',
     icon: 'lucide:house',
     isPublic: false,
+    role: ['admin', 'bar-staff', 'bar-manager'],
   },
   {
     title: 'Bars',
     to: '/bars',
     icon: 'lucide:beer',
     isPublic: false,
-  },
-  {
-    title: 'Menu Categories',
-    to: '/menu-categories',
-    icon: 'lucide:list-tree',
-    isPublic: true,
+    role: ['admin', 'bar-manager'],
   },
   {
     title: 'Drinks',
     to: '/drinks',
     icon: 'lucide:wine',
     isPublic: true,
+    role: ['admin', 'bar-staff', 'bar-manager'],
   },
   {
     title: 'My Tabs',
     to: '/tabs',
     icon: 'lucide:badge-check',
+    isPublic: false,
+    role: ['bar-staff', 'bar-manager'],
+  },
+  {
+    title: 'Users',
+    to: '/users',
+    icon: 'lucide:users',
+    isPublic: false,
+    role: ['admin', 'bar-manager'],
   },
 ]
+
+const rbacLinks = links.filter((link) => {
+  if (link.role.includes(profile.value?.user_role || '')) {
+    return link
+  }
+  return null
+})
 
 const accountLinks = computed(() => {
   return [
@@ -60,7 +73,7 @@ const executeAction = async (linkTitle: string) => {
   }
 }
 
-defineEmits(['taskClicked'])
+defineEmits(['tabClicked'])
 
 const { menuOpen, toggleMenu } = inject(menuKey) as MenuInjectionOptions
 const windowWidth = useWindowSize().width
@@ -91,15 +104,14 @@ watchEffect(() => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem @click="$emit('taskClicked')"> Task </DropdownMenuItem>
-          <DropdownMenuItem> Project </DropdownMenuItem>
+          <DropdownMenuItem @click="$emit('tabClicked')"> Tab </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
 
     <nav class="flex flex-col gap-2 justify-between h-full relative">
       <div>
-        <SidebarLinks :links="links" />
+        <SidebarLinks :links="rbacLinks" />
       </div>
 
       <div class="border-y text-center bg-background py-3">

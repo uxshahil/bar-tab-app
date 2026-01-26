@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          menus: string[]
           name: string
           slug: string
           thumb_url: string | null
@@ -26,7 +25,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: number
-          menus?: string[]
           name: string
           slug: string
           thumb_url?: string | null
@@ -34,12 +32,44 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
-          menus?: string[]
           name?: string
           slug?: string
           thumb_url?: string | null
         }
         Relationships: []
+      }
+      bar_menu: {
+        Row: {
+          bar_id: number
+          menu_id: number
+          menu_name: string | null
+        }
+        Insert: {
+          bar_id: number
+          menu_id: number
+          menu_name?: string | null
+        }
+        Update: {
+          bar_id?: number
+          menu_id?: number
+          menu_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bar_menu_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bar"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bar_menu_menu_id_fkey"
+            columns: ["menu_id"]
+            isOneToOne: false
+            referencedRelation: "menu"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       drinks_glass: {
         Row: {
@@ -103,6 +133,7 @@ export type Database = {
           created_at: string
           glass: string | null
           id: number
+          ingredients: string[] | null
           instructions: string | null
           last_modified: string | null
           measurements: string[] | null
@@ -118,6 +149,7 @@ export type Database = {
           created_at?: string
           glass?: string | null
           id?: number
+          ingredients?: string[] | null
           instructions?: string | null
           last_modified?: string | null
           measurements?: string[] | null
@@ -133,6 +165,7 @@ export type Database = {
           created_at?: string
           glass?: string | null
           id?: number
+          ingredients?: string[] | null
           instructions?: string | null
           last_modified?: string | null
           measurements?: string[] | null

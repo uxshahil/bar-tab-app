@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS public.profile;
 
-DROP TYPE IF EXISTS user_role;
-
+-- DROP TYPE IF EXISTS user_role;
 -- [
 --   'admin',
 --   'bar-manager',

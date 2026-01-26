@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminAuthLayout: typeof import('./src/components/layout/main/AdminAuthLayout.vue')['default']
     AppErrorDevSection: typeof import('./src/components/app-error/AppErrorDevSection.vue')['default']
     AppErrorPage: typeof import('./src/components/app-error/AppErrorPage.vue')['default']
     AppErrorProdSection: typeof import('./src/components/app-error/AppErrorProdSection.vue')['default']
@@ -31,6 +32,7 @@ declare module 'vue' {
     CardFooter: typeof import('./src/components/ui/card/CardFooter.vue')['default']
     CardHeader: typeof import('./src/components/ui/card/CardHeader.vue')['default']
     CardTitle: typeof import('./src/components/ui/card/CardTitle.vue')['default']
+    copy: typeof import('./src/components/layout/main/AdminAuthLayout copy.vue')['default']
     DataTable: typeof import('./src/components/ui/data-table/DataTable.vue')['default']
     DropdownMenu: typeof import('./src/components/ui/dropdown-menu/DropdownMenu.vue')['default']
     DropdownMenuCheckboxItem: typeof import('./src/components/ui/dropdown-menu/DropdownMenuCheckboxItem.vue')['default']
@@ -67,6 +69,7 @@ declare module 'vue' {
     SheetTrigger: typeof import('./src/components/ui/sheet/SheetTrigger.vue')['default']
     Sidebar: typeof import('./src/components/layout/Sidebar.vue')['default']
     SidebarLinks: typeof import('./src/components/layout/SidebarLinks.vue')['default']
+    StaffAuthLayout: typeof import('./src/components/layout/main/StaffAuthLayout.vue')['default']
     Table: typeof import('./src/components/ui/table/Table.vue')['default']
     TableBody: typeof import('./src/components/ui/table/TableBody.vue')['default']
     TableCaption: typeof import('./src/components/ui/table/TableCaption.vue')['default']

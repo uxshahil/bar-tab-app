@@ -110,12 +110,12 @@ const createPrimaryTestUser = async () => {
   }
 }
 
-const seedBars = async (barNames, menuNames) => {
+const seedBars = async (barNames) => {
   const bars = barNames.map((name) => {
-    return { name: name, slug: toSlug(name), menus: faker.helpers.arrayElements(menuNames) }
+    return { name: name, slug: toSlug(name) }
   })
 
-  bars.push({ name: 'VueSchools', slug: toSlug('VueSchools'), menus: ['Drinks'] })
+  bars.push({ name: 'VueSchools', slug: toSlug('VueSchools') })
 
   const { data, error } = await supabase.from('bar').insert(bars).select('id')
 
@@ -131,11 +131,24 @@ const seedMenus = async (menuNames) => {
     return { name: name, slug: toSlug(name), active: true }
   })
 
-  const { data, error } = await supabase.from('menu').insert(menus).select('id')
+  const { data, error } = await supabase.from('menu').insert(menus).select('id, name')
 
   if (error) return logErrorAndExit('Menus', error)
 
   logStep('Menus seeded successfully.')
+
+  return data
+}
+
+const seedBarMenus = async (barId, menuIdName) => {
+  const barMenus = menuIdName.map((menu) => {
+    return { bar_id: barId, menu_id: menu.id, menu_name: menu.name }
+  })
+
+  const { data, error } = await supabase.from('bar_menu').insert(barMenus)
+
+  if (error) return logErrorAndExit('Bar Menus', error)
+  logStep('Bar Menus seeded successfully.')
 
   return data
 }
@@ -227,10 +240,11 @@ const seedDatabase = async () => {
   console.log(`✅ Using test user with ID: ${userId}`);
   console.log(`⚠️ TODO: insert test user ID into any tables that require it!`);
 
-  const bars = ['Doppio Zero', 'Orez Oippod'];
+  const barNames = ['Doppio Zero', 'Orez Oippod'];
   const menuNames = ['Drinks', 'Food'];
-  const barIds = await seedBars(bars, menuNames);
-  await seedMenus(menuNames, barIds);
+  const barIds = await seedBars(barNames);
+  const menuIdNames = await seedMenus(menuNames, barIds);
+  await seedBarMenus(barIds[barIds.length - 1].id, menuIdNames.map(m => ({ id: m.id, name: m.name })));
 
   const apiGlasses = await import('../api_data/glass.json', { with: { type: 'json' } });
   const apiCategories = await import('../api_data/menu_category.json', { with: { type: 'json' } });

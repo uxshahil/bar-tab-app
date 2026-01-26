@@ -24,27 +24,27 @@ export const columns: ColumnDef<Bars[0]>[] = [
     }
   },
   {
-    accessorKey: 'menus',
+    accessorKey: 'menu_name',
     header: () => h('div', { class: 'text-left' }, 'Menus'),
     cell: ({ row }) => {
-      const slug = row.original.slug
-      const menus = row.getValue('menus') as string[]
+      const barMenus = row.original.bar_menu
+      console.log('barMenus', barMenus)
 
-      if (!menus || menus.length === 0) {
+      if (!barMenus || barMenus.length === 0) {
         return h('div', { class: 'text-left text-gray-500' }, 'No menus')
       }
 
       return h(
         'div',
         { class: 'text-left flex flex-wrap gap-2' },
-        menus.map(menu =>
+        barMenus.map(barMenu =>
           h(
             RouterLink,
             {
-              to: `/bars/${slug}/menus/${menu.toLowerCase().replace(/\s+/g, '-')}`,
+              to: `/${barMenu?.menu_name?.toLowerCase()}`,
               class: `text-left font-medium`
             },
-            () => menu
+            () => barMenu.menu_name
           )
         )
       )

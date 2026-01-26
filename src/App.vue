@@ -11,9 +11,17 @@ onMounted(() => {
   useAuthStore().trackAuthChanges()
 })
 
-const { user } = storeToRefs(useAuthStore())
+const { user, profile } = storeToRefs(useAuthStore())
 
-const AuthLayout = defineAsyncComponent(() => import('./components/layout/main/AuthLayout.vue'))
+console.log(profile.value)
+
+const AdminAuthLayout = defineAsyncComponent(
+  () => import('./components/layout/main/AdminAuthLayout.vue'),
+)
+
+const StaffAuthLayout = defineAsyncComponent(
+  () => import('./components/layout/main/StaffAuthLayout.vue'),
+)
 
 const GuestLayout = defineAsyncComponent(() => import('./components/layout/main/GuestLayout.vue'))
 
@@ -25,7 +33,16 @@ useMeta({
 <template>
   <metainfo></metainfo>
   <Transition name="fade" mode="out-in">
-    <Component :is="user ? AuthLayout : GuestLayout" :key="user?.id">
+    <Component
+      :is="
+        profile?.user_role === 'admin'
+          ? AdminAuthLayout
+          : profile?.user_role === 'bar-staff' || profile?.user_role === 'bar-manager'
+            ? StaffAuthLayout
+            : GuestLayout
+      "
+      :key="user?.id"
+    >
       <AppErrorPage v-if="activeError" />
 
       <RouterView v-else v-slot="{ Component, route }">
