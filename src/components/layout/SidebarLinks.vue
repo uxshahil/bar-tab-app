@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { menuKey, type MenuInjectionOptions } from '@/providers/injectionKeys'
+
 interface LinkProp {
   title: string
   to?: string
   icon: string
 }
+
 defineProps<{
   links: LinkProp[]
 }>()
@@ -15,6 +18,8 @@ const emits = defineEmits<{
 const emitActionClicked = (linkTitle: string) => {
   emits('actionClicked', linkTitle)
 }
+
+const { menuOpen } = inject(menuKey) as MenuInjectionOptions
 </script>
 
 <template>
@@ -23,21 +28,31 @@ const emitActionClicked = (linkTitle: string) => {
       v-if="link.to"
       exactActiveClass="text-primary bg-muted"
       :to="link.to"
-      class="flex items-center gap-3 px-4 py-2 mx-2 transition-colors rounded-lg hover:text-primary justify-center lg:justify-normal text-muted-foreground"
+      class="cursor-pointer flex items-center gap-3 px-4 py-2 mx-2 transition-colors rounded-lg hover:text-primary justify-center text-muted-foreground"
+      :class="{ 'justify-normal': menuOpen, 'justify-center': !menuOpen }"
     >
       <iconify-icon :icon="link.icon"></iconify-icon>
-      <span class="hidden lg:block text-nowrap">{{ link.title }}</span>
+      <span class="text-nowrap" :class="{ block: menuOpen, hidden: !menuOpen }">{{
+        link.title
+      }}</span>
     </RouterLink>
 
     <div
       v-else
-      class="cursor-pointer flex items-center gap-3 px-4 py-2 mx-2 transition-colors rounded-lg hover:text-primary justify-center lg:justify-normal text-muted-foreground"
+      class="cursor-pointer flex items-center gap-3 px-4 py-2 mx-2 transition-colors rounded-lg hover:text-primary justify-center text-muted-foreground"
+      :class="{ 'justify-normal': menuOpen, 'justify-center': !menuOpen }"
       @click="emitActionClicked(link.title)"
     >
       <iconify-icon :icon="link.icon"></iconify-icon>
-      <span class="hidden lg:block text-nowrap">{{ link.title }}</span>
+      <span class="text-nowrap" :class="{ block: menuOpen, hidden: !menuOpen }">{{
+        link.title
+      }}</span>
     </div>
   </template>
 </template>
 
-<style scoped></style>
+<!-- <style lang="postcss" scoped>
+.nav-link {
+  @apply flex items-center gap-3 px-4 py-2 mx-2 transition-colors rounded-lg hover:text-primary text-muted-foreground;
+}
+</style> -->

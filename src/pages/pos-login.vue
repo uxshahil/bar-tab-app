@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { posLogin } from '@/utils/supaAuth'
+import { posLogin } from '@/services/supabase/auth'
 import { watchDebounced } from '@vueuse/core'
 
 const formData = ref({

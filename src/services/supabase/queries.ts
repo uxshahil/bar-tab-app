@@ -1,10 +1,16 @@
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/providers/supabaseClient'
 import type { QueryData } from '@supabase/supabase-js'
 
-export const profileQuery = (id: string) =>
-  supabase.from('profile').select('*').eq('id', id).single()
+export const profileQuery = ({ column, value }: { column: string; value: string }) =>
+  supabase.from('profile').select('*').eq(column, value).single()
 
 export type Profile = QueryData<ReturnType<typeof profileQuery>>
+
+export const profilesQuery = supabase.from('profile').select(`id, full_name`)
+
+export const groupedProfilesQuery = (userIds: string[]) =>
+  supabase.from('profile').select('username, avatar_url, id, full_name').in('id', userIds)
+export type Collabs = QueryData<ReturnType<typeof groupedProfilesQuery>>
 
 export const barsQuery = supabase.from('bar').select('*')
 export type Bars = QueryData<typeof barsQuery>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { menuQuery } from '@/utils/supaQueries'
-import type { Menu } from '@/utils/supaQueries'
+import { menuQuery } from '@/services/supabase/queries'
+import type { Menu } from '@/services/supabase/queries'
 
 const userRouteWithIdParam = useRoute('/menus/[slug]')
 

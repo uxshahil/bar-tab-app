@@ -1,4 +1,4 @@
-import type { LoginForm, PosLoginForm } from '@/types/AuthForm'
+import type { LoginForm, PosLoginForm } from '@/types/TypesAuth'
 import type { AuthError, PostgrestError } from '@supabase/supabase-js'
 
 // type FormError<T> = {
@@ -25,7 +25,7 @@ export const useFormErrors = () => {
 
     posLoginFormErrors.value = undefined // Clear other form errors
 
-    const { validateEmail, validatePassword } = await import('@/utils/formValidations')
+    const { validateEmail, validatePassword } = await import('@/utils/validations/FormValidations')
 
     const emailErrors = validateEmail(formData.email)
     if (emailErrors.length) loginFormErrors.value.email = emailErrors
@@ -41,7 +41,7 @@ export const useFormErrors = () => {
 
     loginFormErrors.value = undefined // Clear other form errors
 
-    const { validatePin } = await import('@/utils/formValidations')
+    const { validatePin } = await import('@/utils/validations/FormValidations')
 
     const pinErrors = validatePin(formData.pin)
     if (pinErrors.length) posLoginFormErrors.value.pin = pinErrors

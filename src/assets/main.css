@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -117,4 +117,24 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.scale-v-enter-active,
+.scale-v-leave-active {
+  transition: transform 0.1s;
+}
+
+.scale-v-enter-from,
+.scale-v-leave-to {
+  transform: scale(0.3);
+}
+
+.fade-v-enter-active,
+.fade-v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-v-enter-from,
+.fade-v-leave-to {
+  opacity: 0;
 }

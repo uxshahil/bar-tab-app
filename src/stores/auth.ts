@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabaseClient'
-import { profileQuery } from '@/utils/supaQueries'
+import { supabase } from '@/providers/supabaseClient'
+import { profileQuery } from '@/services/supabase/queries'
 import type { Session, User } from '@supabase/supabase-js'
 import type { Tables } from 'database/types'
 
@@ -15,7 +15,10 @@ export const useAuthStore = defineStore('auth-store', () => {
     }
 
     if (!profile.value || profile.value.id !== user.value.id) {
-      const { data } = await profileQuery(user.value.id)
+      const { data } = await profileQuery({
+        column: 'id',
+        value: user.value.id
+      })
 
       profile.value = data || null
     }
@@ -41,11 +44,17 @@ export const useAuthStore = defineStore('auth-store', () => {
     if (isTrackingAuthChanges.value) return
 
     isTrackingAuthChanges.value = true
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((_event, session) => {
       setTimeout(async () => {
         await setAuth(session)
       }, 0)
     })
+  }
+
+  const profileInitials = (fullName: string = profile.value?.full_name ?? '') => {
+    const names = fullName.split(' ')
+    const initials = names.map(name => name.charAt(0).toUpperCase()).join('')
+    return initials ?? 'NA'
   }
 
   return {
@@ -53,7 +62,8 @@ export const useAuthStore = defineStore('auth-store', () => {
     profile,
     setAuth,
     getSession,
-    trackAuthChanges
+    trackAuthChanges,
+    profileInitials
   }
 })
 

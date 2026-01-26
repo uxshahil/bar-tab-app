@@ -1,5 +1,3 @@
-import type { ManagerPin, StaffPin } from '@/types/AuthForm'
-
 export const validateEmail = (email: string) => {
   const trimmedEmail = email.trim()
   if (!trimmedEmail) return []

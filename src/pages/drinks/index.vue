@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { columns } from '@/utils/tableColumns/drinksColumns'
-import { drinksQuery } from '@/utils/supaQueries'
-import type { Drinks } from '@/utils/supaQueries'
+import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrinks'
+import { drinksQuery } from '@/services/supabase/queries'
+import type { Drinks } from '@/services/supabase/queries'
 
 usePageStore().pageData.title = 'Drinks'
 

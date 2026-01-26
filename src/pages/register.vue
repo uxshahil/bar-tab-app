@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import router from '@/router'
-import { register } from '@/utils/supaAuth'
+import { register } from '@/services/supabase/auth'
 
 const formData = ref({
   username: '',
@@ -9,6 +9,8 @@ const formData = ref({
   confirmPassword: '',
   firstName: '',
   lastName: '',
+  pin: '',
+  role: UserRole.BarManager,
 })
 
 const signup = async () => {

@@ -1,6 +1,7 @@
-import { supabase } from '@/lib/supabaseClient'
-import type { LoginForm, RegisterForm, PosLoginForm } from '@/types/AuthForm'
+import { supabase } from '@/providers/supabaseClient'
+import type { LoginForm, RegisterForm, PosLoginForm } from '@/types/TypesAuth'
 import { fakerAF_ZA as faker } from '@faker-js/faker'
+import { UserRole } from '@/types/TypesAuth'
 
 export const register = async (formData: RegisterForm) => {
   const { data, error } = await supabase.auth.signUp({

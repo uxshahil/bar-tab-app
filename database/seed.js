@@ -13,15 +13,15 @@ const toSlug = (text) => {
   })
 }
 
-// Run the bash script before seeding
-console.log('📥 Fetching cocktail data from API...');
-try {
-  execSync('bash database/prefetch-api-data.sh', { stdio: 'inherit' });
-  console.log('✅ Cocktail data fetched successfully!');
-} catch (error) {
-  console.error('❌ Failed to fetch cocktail data:', error.message);
-  process.exit(1);
-}
+// // Run the bash script before seeding
+// console.log('📥 Fetching cocktail data from API...');
+// try {
+//   execSync('bash database/prefetch-api-data.sh', { stdio: 'inherit' });
+//   console.log('✅ Cocktail data fetched successfully!');
+// } catch (error) {
+//   console.error('❌ Failed to fetch cocktail data:', error.message);
+//   process.exit(1);
+// }
 
 // Now proceed with your existing seed logic
 console.log('🌱 Starting database seed...');
@@ -32,6 +32,12 @@ export const supabase = createClient(
   process.env.SERVICE_ROLE_KEY
 )
 
+const testingUserEmail = process.env.TESTING_USER_EMAIL
+if (!testingUserEmail) {
+  console.error('Have you forgot to add TESTING_USER_EMAIL to your .env file?')
+  process.exit()
+}
+
 const logErrorAndExit = (tableName, error) => {
   console.error(
     `An error occurred in table '${tableName}' with code ${error.code}: ${error.message}`
@@ -41,6 +47,67 @@ const logErrorAndExit = (tableName, error) => {
 
 const logStep = (stepMessage) => {
   console.log(stepMessage)
+}
+
+const PrimaryTestUserExists = async () => {
+  logStep('Checking if primary test user exists...')
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, username')
+    .eq('username', 'testaccount1')
+    .single()
+
+  if (error) {
+    console.log('Primary test user not found. Will create one.')
+    return false
+  }
+
+  logStep('Primary test user is found.')
+  return data?.id
+}
+
+const createPrimaryTestUser = async () => {
+  logStep('Creating primary test user...')
+  const firstName = 'John'
+  const lastName = 'Doe'
+  const userName = 'johndoe19'
+  const email = testingUserEmail
+  const password = 'password'
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password,
+    options: {
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        full_name: firstName + ' ' + lastName,
+        username: userName
+      }
+    }
+  })
+
+  if (error) {
+    logErrorAndExit('Users', error)
+  }
+
+  if (data) {
+    const userId = data.user.id
+    const resp = await supabase.from('profile').insert({
+      id: userId,
+      full_name: firstName + ' ' + lastName,
+      username: userName,
+      bio: 'The main testing account',
+      avatar_url: `https://i.pravatar.cc/150?u=${data.user.id}`,
+      email: email,
+      password: '',
+      user_role: 'admin',
+      pin: '111111'
+    })
+
+    logStep('Primary test user created successfully.')
+    console.log(resp)
+    return userId
+  }
 }
 
 const seedBars = async (barNames, menuNames) => {
@@ -147,6 +214,19 @@ const seedDrinks = async (drinks) => {
 }
 
 const seedDatabase = async () => {
+  let userId
+  const testUserId = await PrimaryTestUserExists()
+
+  if (!testUserId) {
+    const primaryTestUserId = await createPrimaryTestUser()
+    userId = primaryTestUserId
+  } else {
+    userId = testUserId
+  }
+
+  console.log(`✅ Using test user with ID: ${userId}`);
+  console.log(`⚠️ TODO: insert test user ID into any tables that require it!`);
+
   const bars = ['Doppio Zero', 'Orez Oippod'];
   const menuNames = ['Drinks', 'Food'];
   const barIds = await seedBars(bars, menuNames);

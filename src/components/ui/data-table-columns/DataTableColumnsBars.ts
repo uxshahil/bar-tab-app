@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { Bars } from '../supaQueries'
+import type { Bars } from '@/services/supabase/queries'
 import { RouterLink } from 'vue-router'
 
 export const columns: ColumnDef<Bars[0]>[] = [

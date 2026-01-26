@@ -2,12 +2,11 @@ DROP TABLE IF EXISTS public.profile;
 
 DROP TYPE IF EXISTS user_role;
 
-CREATE TYPE user_role AS enum(
-  'admin',
-  'bar-manager',
-  'bar-staff'
-);
-
+-- [
+--   'admin',
+--   'bar-manager',
+--   'bar-staff'
+-- ]
 CREATE TABLE profile(
   id uuid REFERENCES auth.users ON DELETE CASCADE NOT NULL,
   username text UNIQUE NOT NULL,
@@ -15,7 +14,7 @@ CREATE TABLE profile(
   email text UNIQUE NOT NULL,
   full_name text NOT NULL,
   bio text DEFAULT NULL,
-  roles user_role[] DEFAULT ARRAY[]::user_role[] NOT NULL,
+  user_role text DEFAULT 'bar-staff' NOT NULL,
   pin text UNIQUE NOT NULL,
   avatar_url text DEFAULT NULL,
   mode text DEFAULT 'dark' NOT NULL,

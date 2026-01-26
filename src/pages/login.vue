@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { login } from '@/utils/supaAuth'
+import { login } from '@/services/supabase/auth'
 import { watchDebounced } from '@vueuse/core'
 
 const formData = ref({
@@ -37,11 +37,6 @@ const signin = async () => {
         <CardDescription> Login to your account </CardDescription>
       </CardHeader>
       <CardContent>
-        <div class="flex flex-col gap-4 mb-4 justify-center items-center">
-          <Button variant="outline" class="w-full"> Register with Google </Button>
-          <Separator label="Or" />
-        </div>
-
         <form class="grid gap-4" @submit.prevent="signin">
           <div class="grid gap-2">
             <Label id="email" class="text-left">Email</Label>
@@ -61,7 +56,7 @@ const signin = async () => {
           <div class="grid gap-2">
             <div class="flex items-center">
               <Label id="password">Password</Label>
-              <a href="#" class="inline-block ml-auto text-xs underline"> Forgot your password? </a>
+              <!-- <a href="#" class="inline-block ml-auto text-xs underline"> Forgot your password? </a> -->
             </div>
             <Input
               id="password"
@@ -82,9 +77,9 @@ const signin = async () => {
           </ul>
           <Button type="submit" class="w-full"> Login </Button>
         </form>
-        <div class="mt-4 text-sm text-center">
-          Don't have an account?
-          <RouterLink to="/register" class="underline"> Register </RouterLink>
+        <div class="mt-4 text-sm text-center flex flex-col">
+          <span>Don't have an account?</span>
+          <RouterLink to="/readme" class="underline"> Check the README.MD </RouterLink>
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { Drinks } from '../supaQueries'
+import type { Drinks } from '@/services/supabase/queries'
 import { RouterLink } from 'vue-router'
 import { h } from 'vue'
 

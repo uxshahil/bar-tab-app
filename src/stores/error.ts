@@ -1,4 +1,4 @@
-import type { CustomError, ExtendedPostgrestError } from '@/types/Error'
+import type { CustomError, ExtendedPostgrestError } from '@/types/TypesError'
 import type { PostgrestError } from '@supabase/supabase-js'
 
 const activeError = ref<null | CustomError | ExtendedPostgrestError>(null)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { barQuery } from '@/utils/supaQueries'
-import type { Bar } from '@/utils/supaQueries'
+import { barQuery } from '@/services/supabase/queries'
+import type { Bar } from '@/services/supabase/queries'
 
 const userRouteWithIdParam = useRoute('/bars/[slug]')
 
