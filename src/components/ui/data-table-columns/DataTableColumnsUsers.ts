@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { Profiles } from '@/services/supabase/queries'
+import type { Profiles } from '@/services/supabase/types/profileTypes'
 import { RouterLink } from 'vue-router'
 
 export const columns: ColumnDef<Profiles[0]>[] = [

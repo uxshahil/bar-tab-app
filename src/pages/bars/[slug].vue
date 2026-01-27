@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { barQuery } from '@/services/supabase/queries'
-import type { Bar } from '@/services/supabase/queries'
+import { barQuery } from '@/services/supabase/queries/barQueries'
+import type { Bar, BarMenus } from '@/services/supabase/types/barTypes'
+import { RouterLink } from 'vue-router'
 
 const userRouteWithIdParam = useRoute('/bars/[slug]')
 
 const bar = ref<Bar | null>(null)
+const menus = ref<Partial<BarMenus>[] | null>(null)
 
 watch(
   () => bar.value?.name,
@@ -19,6 +21,14 @@ const getBar = async () => {
   if (error) useErrorStore().setError({ error, customCode: status })
 
   bar.value = data
+  if (data?.bar_menu) {
+    menus.value = data.bar_menu.map((menu) => ({
+      ...menu,
+      menu_name: menu.menu_name ?? undefined,
+    }))
+  }
+
+  console.log(menus.value)
 }
 
 await getBar()
@@ -30,46 +40,19 @@ await getBar()
       <TableHead> Name </TableHead>
       <TableCell> {{ bar.name }} </TableCell>
     </TableRow>
-    <TableRow>
+    <TableRow v-if="menus">
       <TableHead> Menus </TableHead>
-      <TableCell>
-        <div class="flex">
-          <Avatar
-            class="-mr-4 border border-primary hover:scale-110 transition-transform"
-            v-for="menu in bar.menus"
-            :key="menu"
-          >
-            <RouterLink class="w-full h-full flex items-center justify-center" to="">
-              <AvatarImage src="" alt="" />
-              <AvatarFallback> {{ menu }}</AvatarFallback>
-            </RouterLink>
-          </Avatar>
-        </div>
+      <TableCell v-for="menu in menus" :key="menu.menu_name">
+        <RouterLink :to="`/${menu.menu_name?.toLowerCase()}`">
+          {{ menu.menu_name }}
+        </RouterLink>
+        <!-- <div class="flex" :v-for="menu in menus" :key="`${menu}`"> -->
+        <!-- <p>{{ JSON.stringify(menus) }}</p> -->
+        <!-- <RouterLink :to="`/${(menu?.menu_name || '').toLowerCase()}`" /> -->
+        <!-- </div> -->
       </TableCell>
     </TableRow>
   </Table>
 </template>
 
-<style>
-th {
-  width: 100px;
-  /* @apply w-[100px]; */
-}
-
-h2 {
-  margin-bottom: 16px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  width: fit-content;
-  /* @apply mb-4 text-lg font-semibold w-fit; */
-}
-
-.table-container {
-  overflow: hidden;
-  overflow-y: auto;
-  border-radius: 0.375rem;
-  background-color: #0f172a;
-  height: 20rem;
-  /* @apply overflow-hidden overflow-y-auto rounded-md bg-slate-900 h-80; */
-}
-</style>
+<style></style>

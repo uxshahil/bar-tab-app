@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { profileQuery } from '@/services/supabase/queries'
+import { profileQuery } from '@/services/supabase/queries/profileQueries'
 import type { Tables } from 'database/types'
 
 const { username } = useRoute('/users/[username]').params

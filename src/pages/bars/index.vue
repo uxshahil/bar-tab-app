@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsBars'
-import { barsQuery } from '@/services/supabase/queries'
-import type { Bars } from '@/services/supabase/queries'
+import { barsQuery } from '@/services/supabase/queries/barQueries'
+import type { Bars } from '@/services/supabase/types/barTypes'
 
 usePageStore().pageData.title = 'Bars'
 

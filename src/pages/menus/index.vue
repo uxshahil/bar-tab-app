@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsMenus'
-import { menusWithCategoriesQuery } from '@/services/supabase/queries'
-import type * as SupaQueries from '@/services/supabase/queries'
+import { menusWithCategoriesQuery } from '@/services/supabase/queries/menuQueries'
+import type { MenusWithCategories } from '@/services/supabase/types/menuTypes'
 
 usePageStore().pageData.title = 'Menus'
 
-const menus = ref<SupaQueries.MenusWithCategories | null>(null)
+const menus = ref<MenusWithCategories | null>(null)
 const getMenus = async () => {
   const { data, error, status } = await menusWithCategoriesQuery
 

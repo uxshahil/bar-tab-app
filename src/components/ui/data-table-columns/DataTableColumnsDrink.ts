@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { Drinks } from '@/services/supabase/queries'
+import type { Drinks } from '@/services/supabase/types/drinkTypes'
 import { RouterLink } from 'vue-router'
 import { h } from 'vue'
 
@@ -13,14 +13,14 @@ export const columns: ColumnDef<Drinks[0]>[] = [
     accessorKey: 'name',
     header: () => h('div', { class: 'text-left' }, 'Name'),
     cell: ({ row }) => {
-      const slug = row.original.slug
+      const slug = row.getValue('slug')
       return h(
         RouterLink,
         {
           to: `/drinks/${slug}`,
           class: 'text-left font-medium hover:bg-muted block w-full'
         },
-        () => row.original.name
+        () => row.getValue('name')
       )
     }
   },

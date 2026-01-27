@@ -1,13 +1,13 @@
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { Bars } from '@/services/supabase/queries'
+import type { Bars } from '@/services/supabase/types/barTypes'
 import { RouterLink } from 'vue-router'
 
 export const columns: ColumnDef<Bars[0]>[] = [
   {
-    accessorKey: 'slug',
+    accessorKey: 'name',
     header: () => h('div', { class: 'text-left' }, 'Name'),
     cell: ({ row }) => {
-      const slug = row.getValue('slug') as string
+      const slug = row.original.slug as string
 
       return h(
         'div',
@@ -18,33 +18,33 @@ export const columns: ColumnDef<Bars[0]>[] = [
             to: `/bars/${slug}`,
             class: `text-left font-medium`
           },
-          () => row.original.name
+          () => row.getValue('name')
         )
       )
     }
   },
   {
-    accessorKey: 'menu_name',
+    accessorKey: 'bar_menu',
     header: () => h('div', { class: 'text-left' }, 'Menus'),
     cell: ({ row }) => {
-      const barMenus = row.original.bar_menu
+      const barMenus = row.getValue('bar_menu') as BarMenus[]
       console.log('barMenus', barMenus)
 
-      if (!barMenus || barMenus.length === 0) {
+      if (!Array.isArray(barMenus) || barMenus.length === 0) {
         return h('div', { class: 'text-left text-gray-500' }, 'No menus')
       }
 
       return h(
         'div',
         { class: 'text-left flex flex-wrap gap-2' },
-        barMenus.map(barMenu =>
+        barMenus.map((m) =>
           h(
             RouterLink,
             {
-              to: `/${barMenu?.menu_name?.toLowerCase()}`,
+              to: `/${(m.menu_name || '').toLowerCase()}`,
               class: `text-left font-medium`
             },
-            () => barMenu.menu_name
+            () => m.menu_name
           )
         )
       )

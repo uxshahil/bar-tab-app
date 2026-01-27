@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrink'
-import { drinkQuery } from '@/services/supabase/queries'
-import type { Drink } from '@/services/supabase/queries'
+import { drinkQuery } from '@/services/supabase/queries/drinkQueries'
+import type { Drink } from '@/services/supabase/types/drinkTypes'
 
 const userRoute = useRoute('/drinks/[slug]')
 

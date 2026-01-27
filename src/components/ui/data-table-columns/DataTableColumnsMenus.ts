@@ -1,5 +1,5 @@
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { MenusWithCategories } from '@/services/supabase/queries'
+import type { MenusWithCategories } from '@/services/supabase/types/menuTypes'
 import { RouterLink } from 'vue-router'
 
 export const columns: ColumnDef<MenusWithCategories[0]>[] = [
@@ -7,14 +7,14 @@ export const columns: ColumnDef<MenusWithCategories[0]>[] = [
     accessorKey: 'name',
     header: () => h('div', { class: 'text-left' }, 'Name'),
     cell: ({ row }) => {
-      const slug = row.original.slug
+      const slug = row.getValue('slug')
       return h(
         RouterLink,
         {
           to: `/menu/${slug}`,
           class: 'text-left font-medium hover:bg-muted block w-full'
         },
-        () => row.original.name
+        () => row.getValue('name')
       )
     }
   },
@@ -40,7 +40,7 @@ export const columns: ColumnDef<MenusWithCategories[0]>[] = [
           return h(
             RouterLink,
             {
-              to: `/menus/${row.original.slug}/${slug.toLowerCase().replace(/\s+/g, '-')}`,
+              to: `/menus/${row.getValue('slug')}/${slug.toLowerCase().replace(/\s+/g, '-')}`,
               class: `text-left font-medium hover:text-red-500 hover:font-black`
             },
             () => category.name

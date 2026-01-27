@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { menuQuery } from '@/services/supabase/queries'
-import type { Menu } from '@/services/supabase/queries'
+import { menuQuery } from '@/services/supabase/queries/menuQueries'
+import type { Menu } from '@/services/supabase/types/menuTypes'
 
 const userRouteWithIdParam = useRoute('/menus/[slug]')
 
@@ -31,7 +31,7 @@ await getMenu()
       <TableCell> {{ menu.name }} </TableCell>
     </TableRow>
     <TableRow>
-      <TableHead> Menus </TableHead>
+      <TableHead> Categories </TableHead>
       <!-- <TableCell>
         <div class="flex">
           <Avatar

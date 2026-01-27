@@ -1,6 +1,6 @@
 import { supabase } from '@/providers/supabaseClient'
 
-export const drinksQuery = () => supabase
+export const drinksQuery = supabase
   .from('menu_item')
   .select('id, name, slug, price, category (name, slug, menu (name, slug))')
 

@@ -65,6 +65,13 @@ declare module 'vue-router/auto-routes' {
       { slug: ParamValue<false> },
       | never
     >,
+    '/food/': RouteRecordInfo<
+      '/food/',
+      '/food',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/login': RouteRecordInfo<
       '/login',
       '/login',
@@ -160,6 +167,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/drinks/[slug].vue': {
       routes:
         | '/drinks/[slug]'
+      views:
+        | never
+    }
+    'src/pages/food/index.vue': {
+      routes:
+        | '/food/'
       views:
         | never
     }
