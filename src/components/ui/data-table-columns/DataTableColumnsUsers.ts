@@ -1,7 +1,18 @@
-import type { ColumnDef } from '@tanstack/vue-table'
-import type { Profiles } from '@/services/supabase/types/profileTypes'
 import { RouterLink } from 'vue-router'
 import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
+import profileRequests from '@/services/supabase/requests/profileRequests.ts'
+// import useUsersStore from '@/stores/loaders/users'
+import type { Profiles } from '@/services/supabase/types/profileTypes'
+import type { ColumnDef } from '@tanstack/vue-table'
+import type { DeleteUser, EditUser } from '@/interfaces/UserInterfaces'
+// import { use } from '@formkit/core'
+
+const { deleteProfile, editProfile } = profileRequests
+// const profileStore = useUsersStore();
+
+
+
+// const updateUser = ref()
 
 export const columns: ColumnDef<Profiles[0]>[] = [
   {
@@ -13,11 +24,11 @@ export const columns: ColumnDef<Profiles[0]>[] = [
         RouterLink,
         {
           to: `/users/${username}`,
-          class: 'text-left font-medium hover:bg-muted block w-full'
+          class: 'text-left font-medium hover:bg-muted block w-full',
         },
-        () => username
+        () => username,
       )
-    }
+    },
   },
   {
     accessorKey: 'user_role',
@@ -25,7 +36,7 @@ export const columns: ColumnDef<Profiles[0]>[] = [
     cell: ({ row }) => {
       const role = row.original.user_role
       return h('div', { class: 'text-left' }, role)
-    }
+    },
   },
   {
     id: 'actions',
@@ -34,9 +45,20 @@ export const columns: ColumnDef<Profiles[0]>[] = [
     cell: ({ row }) => {
       const user = row.original
 
-      return h('div', { class: 'relative' },
-        h(DropdownAction, { object: { id: user.id, name: user.username } })
+      console.log(JSON.stringify(user))
+
+      return h(
+        'div',
+        { class: 'relative' },
+        h(DropdownAction, {
+          object: {
+            id: user.id,
+            name: user.username,
+            editFn: () => editProfile({id: user.id, data:{}} as EditUser),
+            deleteFn: () => deleteProfile({"id": user?.id} as DeleteUser),
+          },
+        }),
       )
-    }
+    },
   },
 ]

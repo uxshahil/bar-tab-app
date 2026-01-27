@@ -46,7 +46,3 @@ npm run build
 ```sh
 npm run lint
 ```
-
-db: vue-masterclass id:vxbutzsricesbueuakae
-db: bar-tab-app id: cdopsjrujdfndhqqihuh
-db-pass: gCmdiOx9O1MX5B9O

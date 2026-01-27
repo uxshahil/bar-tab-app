@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import type { CreateNewUser } from '@/services/supabase/types/profileTypes'
-import {
-  createNewUserQuery,
-  profileQuery,
-  profilesQuery,
-} from '@/services/supabase/queries/profileQueries'
+import type { CreateNewUser } from '@/interfaces/UserInterfaces'
+import createProfile from '@/services/supabase/requests/profileRequests'
 
 const sheetOpen = defineModel<boolean>()
 
@@ -27,10 +23,14 @@ const createUser = async (formData: CreateNewUser) => {
     bio: formData.bio || '', // Default empty string if not provided
   }
 
-  const { error } = await createNewUserQuery(user)
+  const userId = (await createProfile(user)) ?? null
 
-  if (error) {
-    console.log(error)
+  if (userId === null) {
+    console.log('error')
+  }
+
+  if (userId) {
+    console.log('User created with ID:', userId)
   }
 
   sheetOpen.value = false

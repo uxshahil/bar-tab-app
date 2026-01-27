@@ -11,8 +11,5 @@ export interface CreateNewUser {
   avatar_url: string
 }
 
-export interface EditUser extends Partial<CreateNewUser> {
-}
-
-
+export type EditUser = Partial<CreateNewUser>
 

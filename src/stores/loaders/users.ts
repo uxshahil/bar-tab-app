@@ -1,10 +1,12 @@
 import { profilesQuery as usersQuery, profileQuery as userQuery, updateUserQuery } from '@/services/supabase/queries/profileQueries'
 import { useMemoize } from '@vueuse/core'
 import type { Profile as User, Profiles as Users } from '@/services/supabase/types/profileTypes'
+import type { EditUser } from '@/interfaces/UserInterfaces'
 
 export const useUsersStore = defineStore('users-store', () => {
   const users = ref<Users | null>(null)
   const user = ref<User | null>(null)
+  const userEdit = ref<User | null>(user.value)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const loadUsers = useMemoize(async (_key: string) => await usersQuery)
   const loadUser = useMemoize(async (id: string) => await userQuery({ column: 'id', value: id.toString() }))
@@ -55,12 +57,37 @@ export const useUsersStore = defineStore('users-store', () => {
     validateCache({ ref: user, query: userQuery, key: id.toString(), loaderFn: loadUser })
   }
 
-  const updateUser = async () => {
+  const updateUser = async (editUser: EditUser) => {
+    // Validate user exists
     if (!user.value) return
 
-    const { id, ...userProperties } = user.value
+    // Extract id and properties
+    if (!editUser.id) return
 
-    await updateUserQuery(userProperties, id)
+    // Validate editUser input
+    if (!editUser || typeof editUser !== 'object') return
+
+    // Create merged user object with updated properties
+    const updatedUser = {
+      ...user.value,
+      ...editUser
+    }
+
+    try {
+      // Update user in database
+      const { error } = await updateUserQuery(updatedUser, editUser.id)
+      if (error) throw error
+
+      // Update local user state
+      user.value = updatedUser
+      
+      // Update userEdit ref
+      userEdit.value = updatedUser
+
+    } catch (error) {
+      useErrorStore().setError({ 'error': error })
+      return
+    }
   }
 
   return {

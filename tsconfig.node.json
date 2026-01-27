@@ -22,6 +22,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+  "ts-node": {
+    "esm": true
+  },
   "include": [
     "vite.config.*",
     "vitest.config.*",

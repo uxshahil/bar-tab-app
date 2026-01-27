@@ -53,7 +53,7 @@ export const columns: ColumnDef<Drinks[0]>[] = [
         const drink = row.original
   
         return h('div', { class: 'relative' },
-          h(DropdownAction, { object: { id: drink.id, name: drink.name, editFn: openDrinkSheet, deleteFn: openModalConfirmation } })
+          h(DropdownAction, { object: { id: drink.id, name: drink.name, editFn: updateDrink, deleteFn: deleteDrink } })
         )
       }
     },
