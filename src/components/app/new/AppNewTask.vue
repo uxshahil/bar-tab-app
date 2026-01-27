@@ -1,6 +1,6 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import type { CreateNewTask } from '@/types/CreateNewForm'
-import { createNewTaskQuery, profilesQuery, projectsQuery } from '@/services/supabase/queries'
+import { createNewTaskQuery, profilesQuery, projectsQuery } from '@/services/supabase/queries/'
 
 const sheetOpen = defineModel<boolean>()
 
@@ -115,4 +115,4 @@ const createTask = async (formData: CreateNewTask) => {
       </FormKit>
     </SheetContent>
   </Sheet>
-</template>
+</template> -->

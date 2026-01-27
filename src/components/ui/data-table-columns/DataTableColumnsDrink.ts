@@ -51,8 +51,15 @@ export const columns: ColumnDef<Drinks[0]>[] = [
   },
   {
     accessorKey: 'price',
-    header: () => h('div', { class: 'text-left' }, 'Price (ZAR)'),
-    cell: ({ row }) => h('div', { class: 'text-left' }, row.getValue('price'))
+    header: () => h('div', { class: 'text-left' }, 'Price'),
+    cell: ({ row }) => {
+      const amount = Number.parseFloat(row.getValue('price'))
+      const formatted = new Intl.NumberFormat('en-ZA', {
+        style: 'currency',
+        currency: 'ZAR',
+      }).format(amount)
+      return h('div', { class: 'text-right font-medium' }, formatted)
+    },
   },
   {
     accessorKey: 'instructions',
