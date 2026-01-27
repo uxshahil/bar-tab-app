@@ -7,7 +7,7 @@ export const columns: ColumnDef<MenusWithCategories[0]>[] = [
     accessorKey: 'name',
     header: () => h('div', { class: 'text-left' }, 'Name'),
     cell: ({ row }) => {
-      const slug = row.getValue('slug')
+      const slug = row.original.slug
       return h(
         RouterLink,
         {
@@ -40,7 +40,7 @@ export const columns: ColumnDef<MenusWithCategories[0]>[] = [
           return h(
             RouterLink,
             {
-              to: `/menus/${row.getValue('slug')}/${slug.toLowerCase().replace(/\s+/g, '-')}`,
+              to: `/menus/${row.original.slug}/${slug.toLowerCase().replace(/\s+/g, '-')}`,
               class: `text-left font-medium hover:text-red-500 hover:font-black`
             },
             () => category.name

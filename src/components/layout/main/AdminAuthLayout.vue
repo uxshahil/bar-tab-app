@@ -3,10 +3,22 @@ import { menuKey } from '@/providers/injectionKeys'
 
 const { pageData } = storeToRefs(usePageStore())
 
-const taskSheetOpen = ref(false)
+const taskSheetOpen = ref({ user: false, tab: false, drink: false })
 
 const menuOpen = ref(false)
 const toggleMenu = () => (menuOpen.value = !menuOpen.value)
+
+const userClicked = () => {
+  taskSheetOpen.value = { user: true, tab: false, drink: false }
+}
+
+const tabClicked = () => {
+  taskSheetOpen.value = { user: false, tab: true, drink: false }
+}
+
+const drinkClicked = () => {
+  taskSheetOpen.value = { user: false, tab: false, drink: true }
+}
 
 provide(menuKey, {
   menuOpen,
@@ -16,12 +28,10 @@ provide(menuKey, {
 
 <template>
   <div>
-    <Sidebar
-      @userClicked="taskSheetOpen = true"
-      @tabClicked="taskSheetOpen = true"
-      @drinkClicked="taskSheetOpen = true"
-    />
-    <AppNewUser v-model="taskSheetOpen" />
+    <Sidebar @userClicked="userClicked" @tabClicked="tabClicked" @drinkClicked="drinkClicked" />
+    <AppNewUser v-model="taskSheetOpen.user" />
+    <AppNewDrink v-model="taskSheetOpen.drink" />
+    <!-- <AppNewTab v-model="taskSheetOpen.tab" /> -->
 
     <div
       class="flex flex-col transition-[margin]"

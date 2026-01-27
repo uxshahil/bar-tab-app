@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    2: typeof import('./src/components/app/new/AppNew[temp] copy 2.vue')['default']
     AdminAuthLayout: typeof import('./src/components/layout/main/AdminAuthLayout.vue')['default']
     AppErrorDevSection: typeof import('./src/components/app/error/AppErrorDevSection.vue')['default']
     AppErrorPage: typeof import('./src/components/app/error/AppErrorPage.vue')['default']
@@ -19,7 +20,9 @@ declare module 'vue' {
     AppInPlaceEditText: typeof import('./src/components/app/inPlaceEdit/AppInPlaceEditText.vue')['default']
     AppInPlaceEditTextArea: typeof import('./src/components/app/inPlaceEdit/AppInPlaceEditTextArea.vue')['default']
     'AppNew[temp]': typeof import('./src/components/app/new/AppNew[temp].vue')['default']
+    AppNewDrink: typeof import('./src/components/app/new/AppNewDrink.vue')['default']
     AppNewProject: typeof import('./src/components/app/new/AppNewProject.vue')['default']
+    AppNewTab: typeof import('./src/components/app/new/AppNewTab.vue')['default']
     AppNewTask: typeof import('./src/components/app/new/AppNewTask.vue')['default']
     AppNewUser: typeof import('./src/components/app/new/AppNewUser.vue')['default']
     AuthLayout: typeof import('./src/components/layout/main/AuthLayout.vue')['default']

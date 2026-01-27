@@ -7,17 +7,12 @@ export const profileQuery = ({ column, value }: { column: string; value: string 
   .eq(column, value)
   .single()
 
-export const profilesQuery = () => (supabase
+export const profilesQuery = () => supabase
   .from('profile')
   .select(`id, username, full_name, user_role`)
-)
+
 
 export const updateUserQuery = (updatedUser = {} as Partial<Profile>, id: string) => supabase
   .from('profile')
   .update(updatedUser)
   .eq('id', id)
-
-export const groupedProfilesQuery = (userIds: string[]) => supabase
-  .from('profile')
-  .select('username, avatar_url, id, full_name')
-  .in('id', userIds)

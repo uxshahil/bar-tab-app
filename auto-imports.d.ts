@@ -78,6 +78,7 @@ declare global {
   const useTasksStore: typeof import('./src/stores/loaders/drinks').useTasksStore
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useUsersStore: typeof import('./src/stores/loaders/users').useUsersStore
+  const usebs: typeof import('./src/composables/collabs').usebs
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
