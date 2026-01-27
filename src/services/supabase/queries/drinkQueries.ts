@@ -4,6 +4,21 @@ export const drinksQuery = supabase
   .from('menu_item')
   .select('id, name, slug, price, category (name, slug, menu (name, slug))')
 
+// Helper to build a drinks query with optional search filtering
+export const fetchDrinks = (search?: string | '*') => {
+  let q = supabase
+    .from('menu_item')
+    .select('id, name, slug, price, category (name, slug, menu (name, slug))')
+
+  if (search && String(search).trim().length) {
+    const term = `%${String(search).trim()}%`
+    // search in name and slug (case-insensitive)
+    q = q.or(`name.ilike.${term},slug.ilike.${term}`)
+  }
+
+  return q
+}
+
 export const drinkQuery = (slug: string) => supabase
   .from('menu_item')
   .select(`*`)

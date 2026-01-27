@@ -1,20 +1,32 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrinks'
-import { drinksQuery } from '@/services/supabase/queries/drinkQueries'
+import { fetchDrinks } from '@/services/supabase/queries/drinkQueries'
+import { useRoute, useRouter } from 'vue-router'
 import type { Drinks } from '@/services/supabase/types/drinkTypes'
 
 usePageStore().pageData.title = 'Drinks'
 
+const route = useRoute()
+
 const drinks = ref<Drinks | null>(null)
-const getDrinks = async () => {
-  const { data, error, status } = await drinksQuery
+const getDrinks = async (search?: string) => {
+  const { data, error, status } = await fetchDrinks(search)
 
   if (error) useErrorStore().setError({ error, customCode: status })
 
   drinks.value = data
 }
 
-await getDrinks()
+// Load initially using current query param
+await getDrinks(route.query.search as string | undefined)
+
+// React to search query changes (e.g. from navbar)
+watch(
+  () => route.query.search,
+  (newSearch) => {
+    getDrinks(newSearch as string | undefined)
+  },
+)
 </script>
 
 <template>
