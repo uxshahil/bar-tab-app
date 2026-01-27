@@ -19,6 +19,13 @@ const links = [
     role: ['admin', 'bar-manager'],
   },
   {
+    title: 'Menus',
+    to: '/menus',
+    icon: 'lucide:square-menu',
+    isPublic: true,
+    role: ['admin', 'bar-staff', 'bar-manager'],
+  },
+  {
     title: 'Drinks',
     to: '/drinks',
     icon: 'lucide:wine',
@@ -80,7 +87,7 @@ const executeAction = async (linkTitle: string) => {
   }
 }
 
-defineEmits(['tabClicked'])
+defineEmits(['tabClicked', 'userClicked', 'drinkClicked'])
 
 const { menuOpen, toggleMenu } = inject(menuKey) as MenuInjectionOptions
 const windowWidth = useWindowSize().width
@@ -112,6 +119,8 @@ watchEffect(() => {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem @click="$emit('tabClicked')"> Tab </DropdownMenuItem>
+          <DropdownMenuItem @click="$emit('userClicked')"> User </DropdownMenuItem>
+          <DropdownMenuItem @click="$emit('drinkClicked')"> Drink </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

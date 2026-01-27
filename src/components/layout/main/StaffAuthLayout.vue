@@ -16,8 +16,12 @@ provide(menuKey, {
 
 <template>
   <div>
-    <Sidebar @taskClicked="taskSheetOpen = true" />
-    <!-- <AppNewTask v-model="taskSheetOpen" /> -->
+    <Sidebar
+      @userClicked="taskSheetOpen = true"
+      @tabClicked="taskSheetOpen = true"
+      @drinkClicked="taskSheetOpen = true"
+    />
+    <AppNewUser v-model="taskSheetOpen" />
 
     <div
       class="flex flex-col transition-[margin]"

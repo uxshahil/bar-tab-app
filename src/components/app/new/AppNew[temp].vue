@@ -6,9 +6,9 @@ const sheetOpen = defineModel<boolean>()
   <Sheet v-model:open="sheetOpen">
     <SheetContent>
       <SheetHeader>
-        <SheetTitle>Create new project</SheetTitle>
+        <SheetTitle>Create new user</SheetTitle>
       </SheetHeader>
-      <FormKit type="text" label="Project Name" name="projectName" />
+      <FormKit type="text" label="User Name" name="userName" />
       <SheetFooter>
         <Button type="submit"> Save changes </Button>
         <SheetClose as-child>

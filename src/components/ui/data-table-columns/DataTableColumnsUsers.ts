@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { Profiles } from '@/services/supabase/types/profileTypes'
 import { RouterLink } from 'vue-router'
+import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
 
 export const columns: ColumnDef<Profiles[0]>[] = [
   {
@@ -25,5 +26,17 @@ export const columns: ColumnDef<Profiles[0]>[] = [
       const role = row.original.user_role
       return h('div', { class: 'text-left' }, role)
     }
-  }
+  },
+  {
+    id: 'actions',
+    header: () => h('div', { class: 'text-left' }, 'Actions'),
+    enableHiding: false,
+    cell: ({ row }) => {
+      const user = row.original
+
+      return h('div', { class: 'relative' },
+        h(DropdownAction, { object: { id: user.id, name: user.username } })
+      )
+    }
+  },
 ]

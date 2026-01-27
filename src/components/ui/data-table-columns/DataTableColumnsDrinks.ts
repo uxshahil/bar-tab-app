@@ -2,6 +2,9 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import type { Drinks } from '@/services/supabase/types/drinkTypes'
 import { RouterLink } from 'vue-router'
 import { h } from 'vue'
+import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
+
+const { updateDrink, deleteDrink } = useDrinksStore();
 
 export const columns: ColumnDef<Drinks[0]>[] = [
   {
@@ -41,5 +44,17 @@ export const columns: ColumnDef<Drinks[0]>[] = [
       }).format(amount)
       return h('div', { class: 'text-right font-medium' }, formatted)
     },
-  }
+  },
+    {
+      id: 'actions',
+      header: () => h('div', { class: 'text-left' }, 'Actions'),
+      enableHiding: false,
+      cell: ({ row }) => {
+        const drink = row.original
+  
+        return h('div', { class: 'relative' },
+          h(DropdownAction, { object: { id: drink.id, name: drink.name, editFn: openDrinkSheet, deleteFn: openModalConfirmation } })
+        )
+      }
+    },
 ]
