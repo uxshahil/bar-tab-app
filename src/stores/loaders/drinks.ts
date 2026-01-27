@@ -1,89 +1,88 @@
-// import {
-//   tasksWithProjectsQuery,
-//   taskQuery,
-//   updateTaskQuery,
-//   deleteTaskQuery
-// } from '@/services/supabase/queries'
-// import { useMemoize } from '@vueuse/core'
-// import type { Task, TasksWithProjects } from '@/services/supabase/queries'
+import {
+  drinksQuery,
+  drinkQuery,
+  updateDrinkQuery,
+  deleteDrinkQuery
+} from '@/services/supabase/queries/drinkQueries'
+import { useMemoize } from '@vueuse/core'
+import type { Drink, Drinks } from '@/services/supabase/types/drinkTypes'
 
-// export const useTasksStore = defineStore('tasks-store', () => {
-//   const tasks = ref<TasksWithProjects | null>(null)
-//   const task = ref<Task | null>(null)
-//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//   const loadTasks = useMemoize(async (_key: string) => await tasksWithProjectsQuery)
-//   const loadTask = useMemoize(async (key: number) => await taskQuery(key))
+export const useDrinksStore = defineStore('drinks-store', () => {
+  const drinks = ref<Drinks | null>(null)
+  const drink = ref<Drink | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const loadDrinks = useMemoize(async (_key: string) => await drinksQuery)
+  const loadDrink = useMemoize(async (key: string) => await drinkQuery(key))
 
-//   interface ValidateCacheParams {
-//     ref: typeof tasks | typeof task
-//     query: typeof tasksWithProjectsQuery | typeof taskQuery
-//     key: number | string
-//     loaderFn: typeof loadTasks | typeof loadTask
-//   }
+  interface ValidateCacheParams {
+    ref: typeof drinks | typeof drink
+    query: typeof drinksQuery | typeof drinkQuery
+    key: string
+    loaderFn: typeof loadDrinks | typeof loadDrink
+  }
 
-//   const validateCache = ({ ref, query, key, loaderFn }: ValidateCacheParams) => {
-//     if (ref.value) {
-//       const finalQuery = typeof query === 'function' ? query(key as number) : query
+  const validateCache = ({ ref, query, key, loaderFn }: ValidateCacheParams) => {
+    if (ref.value) {
+      const finalQuery = typeof query === 'function' ? query(key as string) : query
 
-//       finalQuery.then(({ data, error }) => {
-//         if (JSON.stringify(ref.value) === JSON.stringify(data)) {
-//           return
-//         } else {
-//           if (loaderFn === loadTask) {
-//             loaderFn.delete(key as number)
-//           } else if (loaderFn === loadTasks) {
-//             loaderFn.delete(key as string)
-//           }
-//           if (!error && data) ref.value = data
-//         }
-//       })
-//     }
-//   }
+      finalQuery.then(({ data, error }) => {
+        if (JSON.stringify(ref.value) === JSON.stringify(data)) {
+          return
+        } else {
+          loaderFn.delete(key as string)
+          if (!error && data) ref.value = data
+        }
+      })
+    }
+  }
 
-//   const getTasks = async () => {
-//     tasks.value = null
+  const getDrinks = async () => {
+    drinks.value = null
 
-//     const { data, error, status } = await loadTasks('tasks')
+    const { data, error, status } = await loadDrinks('drinks')
 
-//     if (error) useErrorStore().setError({ error, customCode: status })
+    if (error) useErrorStore().setError({ error, customCode: status })
+    if (data) drinks.value = data
 
-//     if (data) tasks.value = data
+    validateCache({ ref: drinks, query: drinksQuery, key: 'drinks', loaderFn: loadDrinks })
+  }
 
-//     validateCache({ ref: tasks, query: tasksWithProjectsQuery, key: 'tasks', loaderFn: loadTasks })
-//   }
+  const getDrink = async (id: string) => {
+    drink.value = null
 
-//   const getTask = async (id: number) => {
-//     task.value = null
+    const { data, error, status } = await loadDrink(id)
 
-//     const { data, error, status } = await loadTask(id)
+    if (error) useErrorStore().setError({ error, customCode: status })
+    if (data) drink.value = data
 
-//     if (error) useErrorStore().setError({ error, customCode: status })
+    validateCache({ ref: drink, query: drinkQuery, key: id, loaderFn: loadDrink })
+  }
 
-//     if (data) task.value = data
+  const updateDrink = async () => {
+    if (!drink.value) return
 
-//     validateCache({ ref: task, query: taskQuery, key: id, loaderFn: loadTask })
-//   }
+    const { id, ...drinkProperties } = drink.value
 
-//   const updateTask = async () => {
-//     if (!task.value) return
+    const {error, status} = await updateDrinkQuery(drinkProperties, id)
+    if (error) useErrorStore().setError({ error, customCode: status })
+  }
 
-//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     const { projects, id, ...taskProperties } = task.value
+  const deleteDrink = async () => {
+    if (!drink.value) return
 
-//     await updateTaskQuery(taskProperties, task.value.id)
-//   }
+    const { error, status } = await deleteDrinkQuery(drink.value.id)
+    if (error) useErrorStore().setError({ error, customCode: status })
 
-//   const deleteTask = async () => {
-//     if (!task.value) return
-//     const { error } = await deleteTaskQuery(task.value.id)
-//   }
+    getDrinks()
+  }
 
-//   return {
-//     tasks,
-//     task,
-//     getTasks,
-//     getTask,
-//     updateTask,
-//     deleteTask
-//   }
-// })
+  return {
+    drinks,
+    drink,
+    getDrinks,
+    getDrink,
+    updateDrink,
+    deleteDrink
+  }
+})
+

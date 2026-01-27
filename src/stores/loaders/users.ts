@@ -1,6 +1,6 @@
-import { profilesQuery as usersQuery, profileQuery as userQuery, updateUserQuery } from '@/services/supabase/queries'
+import { profilesQuery as usersQuery, profileQuery as userQuery, updateUserQuery } from '@/services/supabase/queries/profileQueries'
 import { useMemoize } from '@vueuse/core'
-import type { Profile as User, Profiles as Users } from '@/services/supabase/queries'
+import type { Profile as User, Profiles as Users } from '@/services/supabase/types/profileTypes'
 
 export const useUsersStore = defineStore('users-store', () => {
   const users = ref<Users | null>(null)

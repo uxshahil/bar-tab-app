@@ -64,6 +64,7 @@ declare global {
   const useCollabs: typeof import('./src/composables/collabs').useCollabs
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
+  const useDrinksStore: typeof import('./src/stores/loaders/drinks').useDrinksStore
   const useErrorStore: typeof import('./src/stores/error').useErrorStore
   const useFormErrors: typeof import('./src/composables/formErrors').useFormErrors
   const useId: typeof import('vue').useId
@@ -74,7 +75,7 @@ declare global {
   const useRoute: typeof import('vue-router').useRoute
   const useRouter: typeof import('vue-router').useRouter
   const useSlots: typeof import('vue').useSlots
-  const useTasksStore: typeof import('./src/stores/loaders/tasks').useTasksStore
+  const useTasksStore: typeof import('./src/stores/loaders/drinks').useTasksStore
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useUsersStore: typeof import('./src/stores/loaders/users').useUsersStore
   const watch: typeof import('vue').watch

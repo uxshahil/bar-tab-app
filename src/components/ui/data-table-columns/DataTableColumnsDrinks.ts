@@ -24,7 +24,7 @@ export const columns: ColumnDef<Drinks[0]>[] = [
       return h(
         RouterLink,
         {
-          to: `/menu/${slug}`,
+          to: `/drinks/${slug}`,
           class: 'text-left font-medium hover:bg-muted block w-full'
         },
         () => row.original.name
