@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    2: typeof import('./src/components/app/new/AppNew[temp] copy 2.vue')['default']
     AdminAuthLayout: typeof import('./src/components/layout/main/AdminAuthLayout.vue')['default']
     AppErrorDevSection: typeof import('./src/components/app/error/AppErrorDevSection.vue')['default']
     AppErrorPage: typeof import('./src/components/app/error/AppErrorPage.vue')['default']
@@ -21,11 +20,9 @@ declare module 'vue' {
     AppInPlaceEditTextArea: typeof import('./src/components/app/inPlaceEdit/AppInPlaceEditTextArea.vue')['default']
     'AppNew[temp]': typeof import('./src/components/app/new/AppNew[temp].vue')['default']
     AppNewDrink: typeof import('./src/components/app/new/AppNewDrink.vue')['default']
-    AppNewProject: typeof import('./src/components/app/new/AppNewProject.vue')['default']
     AppNewTab: typeof import('./src/components/app/new/AppNewTab.vue')['default']
-    AppNewTask: typeof import('./src/components/app/new/AppNewTask.vue')['default']
     AppNewUser: typeof import('./src/components/app/new/AppNewUser.vue')['default']
-    AuthLayout: typeof import('./src/components/layout/main/AuthLayout.vue')['default']
+    AppTabDetails: typeof import('./src/components/app/tab/AppTabDetails.vue')['default']
     Avatar: typeof import('./src/components/ui/avatar/Avatar.vue')['default']
     AvatarFallback: typeof import('./src/components/ui/avatar/AvatarFallback.vue')['default']
     AvatarImage: typeof import('./src/components/ui/avatar/AvatarImage.vue')['default']
@@ -37,7 +34,6 @@ declare module 'vue' {
     CardFooter: typeof import('./src/components/ui/card/CardFooter.vue')['default']
     CardHeader: typeof import('./src/components/ui/card/CardHeader.vue')['default']
     CardTitle: typeof import('./src/components/ui/card/CardTitle.vue')['default']
-    copy: typeof import('./src/components/layout/main/AdminAuthLayout copy.vue')['default']
     DataTable: typeof import('./src/components/ui/data-table/DataTable.vue')['default']
     DataTableDropDown: typeof import('./src/components/ui/data-table-drop-down/DataTableDropDown.vue')['default']
     DropdownMenu: typeof import('./src/components/ui/dropdown-menu/DropdownMenu.vue')['default']
@@ -61,6 +57,7 @@ declare module 'vue' {
     InputOTPSeparator: typeof import('./src/components/ui/input-otp/InputOTPSeparator.vue')['default']
     InputOTPSlot: typeof import('./src/components/ui/input-otp/InputOTPSlot.vue')['default']
     Label: typeof import('./src/components/ui/label/Label.vue')['default']
+    PaymentProcessor: typeof import('./src/components/app/tab/PaymentProcessor.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Separator: typeof import('./src/components/ui/separator/Separator.vue')['default']
@@ -76,6 +73,7 @@ declare module 'vue' {
     Sidebar: typeof import('./src/components/layout/Sidebar.vue')['default']
     SidebarLinks: typeof import('./src/components/layout/SidebarLinks.vue')['default']
     StaffAuthLayout: typeof import('./src/components/layout/main/StaffAuthLayout.vue')['default']
+    TabItemForm: typeof import('./src/components/app/tab/TabItemForm.vue')['default']
     Table: typeof import('./src/components/ui/table/Table.vue')['default']
     TableBody: typeof import('./src/components/ui/table/TableBody.vue')['default']
     TableCaption: typeof import('./src/components/ui/table/TableCaption.vue')['default']
@@ -85,6 +83,8 @@ declare module 'vue' {
     TableHead: typeof import('./src/components/ui/table/TableHead.vue')['default']
     TableHeader: typeof import('./src/components/ui/table/TableHeader.vue')['default']
     TableRow: typeof import('./src/components/ui/table/TableRow.vue')['default']
+    TabSheet: typeof import('./src/components/tab/TabSheet.vue')['default']
+    TabSplitForm: typeof import('./src/components/app/tab/TabSplitForm.vue')['default']
     TopNavbar: typeof import('./src/components/layout/TopNavbar.vue')['default']
   }
 }

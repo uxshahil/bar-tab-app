@@ -26,6 +26,7 @@ declare global {
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
+  const loaders: typeof import('./src/stores/loaders/index.js').default
   const markRaw: typeof import('vue').markRaw
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
@@ -75,6 +76,8 @@ declare global {
   const useRoute: typeof import('vue-router').useRoute
   const useRouter: typeof import('vue-router').useRouter
   const useSlots: typeof import('vue').useSlots
+  const useTabSheetStore: typeof import('./src/stores/tabSheet').useTabSheetStore
+  const useTabsStore: typeof import('./src/stores/loaders/tabs').useTabsStore
   const useTasksStore: typeof import('./src/stores/loaders/drinks').useTasksStore
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useUsersStore: typeof import('./src/stores/loaders/users').useUsersStore

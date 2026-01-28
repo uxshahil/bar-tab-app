@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrinks'
 import { fetchDrinks } from '@/services/supabase/queries/drinkQueries'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import type { Drinks } from '@/services/supabase/types/drinkTypes'
 
 usePageStore().pageData.title = 'Drinks'

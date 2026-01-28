@@ -1,100 +1,176 @@
-import { profilesQuery as usersQuery, profileQuery as userQuery, updateUserQuery } from '@/services/supabase/queries/profileQueries'
-import { useMemoize } from '@vueuse/core'
 import type { Profile as User, Profiles as Users } from '@/services/supabase/types/profileTypes'
-import type { EditUser } from '@/interfaces/UserInterfaces'
+import type { CreateNewUser, EditUser, DeleteUser } from '@/interfaces/UserInterfaces'
+import { profilesQuery as usersQuery, profileQuery as userQuery } from '@/services/supabase/queries/profileQueries'
+// Change the import to use named exports
+import profileRequests from '@/services/supabase/requests/profileRequests'
 
 export const useUsersStore = defineStore('users-store', () => {
+  // State
   const users = ref<Users | null>(null)
   const user = ref<User | null>(null)
-  const userEdit = ref<User | null>(user.value)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const loadUsers = useMemoize(async (_key: string) => await usersQuery)
-  const loadUser = useMemoize(async (id: string) => await userQuery({ column: 'id', value: id.toString() }))
 
-  interface ValidateCacheParams {
-    ref: typeof users | typeof user
-    query: typeof usersQuery | typeof userQuery
-    key: string
-    loaderFn: typeof loadUsers | typeof loadUser
-  }
+  // Convert Profile type to CreateNewUser type
+  // const convertProfileToCreateUser = (profileData: Partial<User>): Partial<CreateNewUser> => {
+  //   // Extract first and last name from full_name
+  //   const [firstName, lastName] = profileData.full_name?.split(' ') || ['', '']
+    
+  //   return {
+  //     firstName,
+  //     lastName,
+  //     username: profileData.username || '',
+  //     email: profileData.email || '',
+  //     password: profileData.password || '',
+  //     user_role: (profileData.user_role as 'bar-staff' | 'bar-manager') || 'bar-staff',
+  //     pin: profileData.pin || '',
+  //     bio: profileData.bio || '',
+  //     avatar_url: profileData.avatar_url || ''
+  //   }
+  // }
 
-  const validateCache = ({ ref, query, key, loaderFn }: ValidateCacheParams) => {
-    if (ref.value) {
-      const finalQuery = typeof query === 'function' ? query(key) : query
-
-      finalQuery.then(({ data, error }) => {
-        if (JSON.stringify(ref.value) === JSON.stringify(data)) {
-          return
-        } else {
-          loaderFn.delete(key)
-          if (!error && data) ref.value = data
-        }
-      })
+  // Convert CreateNewUser to Profile format
+  const convertCreateUserToProfile = (userData: CreateNewUser): Partial<User> => {
+    return {
+      full_name: `${userData.firstName} ${userData.lastName}`,
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      user_role: userData.user_role,
+      pin: userData.pin,
+      bio: userData.bio,
+      avatar_url: userData.avatar_url,
+      active: true,
+      mode: 'light'
     }
   }
 
+  // Simple cache implementation without complex validation
   const getUsers = async () => {
     users.value = null
+    const response = await usersQuery()
+    const { data, error, status } = response
 
-    const { data, error, status } = await loadUsers('users')
-
-    if (error) useErrorStore().setError({ error, customCode: status })
-
-    if (data) users.value = data
-
-    validateCache({ ref: users, query: usersQuery, key: 'users', loaderFn: loadUsers })
-  }
-
-  const getUser = async (id: string) => {
-    user.value = null
-
-    const { data, error, status } = await loadUser(id)
-
-    if (error) useErrorStore().setError({ error, customCode: status })
-
-    if (data) user.value = data
-
-    validateCache({ ref: user, query: userQuery, key: id.toString(), loaderFn: loadUser })
-  }
-
-  const updateUser = async (editUser: EditUser) => {
-    // Validate user exists
-    if (!user.value) return
-
-    // Extract id and properties
-    if (!editUser.id) return
-
-    // Validate editUser input
-    if (!editUser || typeof editUser !== 'object') return
-
-    // Create merged user object with updated properties
-    const updatedUser = {
-      ...user.value,
-      ...editUser
+    if (error) {
+      useErrorStore().setError({ error, customCode: status })
+      return
     }
 
-    try {
-      // Update user in database
-      const { error } = await updateUserQuery(updatedUser, editUser.id)
-      if (error) throw error
+    users.value = data
+  }
 
-      // Update local user state
-      user.value = updatedUser
-      
-      // Update userEdit ref
-      userEdit.value = updatedUser
+  const getUser = async (column: string, value: string) => {
+    user.value = null
+    const response = await userQuery({ column, value })
+    const { data, error, status } = response
 
-    } catch (error) {
-      useErrorStore().setError({ 'error': error })
+    if (error) {
+      useErrorStore().setError({ error, customCode: status })
       return
+    }
+
+    user.value = data
+  }
+
+  const createUser = async (userData: CreateNewUser) => {
+    try {
+      // Convert CreateNewUser to Profile format
+      const profileData = convertCreateUserToProfile(userData)
+      
+      // Use the createProfile function which should return a Promise
+      // Add type assertion to ensure profileData matches the expected type
+      const userId = await profileRequests.createProfile(profileData as CreateNewUser)
+      // Refresh users list
+      await getUsers()
+
+      return userId
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      useErrorStore().setError({ 
+        error: error.message || 'Failed to create user', 
+        customCode: error.status || 500 
+      })
+      return null
+    }
+  }
+
+  const updateUser = async (userId: string | number, updates: Partial<CreateNewUser>) => {
+    try {
+      // Convert updates to Profile format
+      const profileUpdates: Partial<User> = {}
+      
+      if (updates.firstName && updates.lastName) {
+        profileUpdates.full_name = `${updates.firstName} ${updates.lastName}`
+      }
+      
+      if (updates.username !== undefined) profileUpdates.username = updates.username
+      if (updates.email !== undefined) profileUpdates.email = updates.email
+      if (updates.password !== undefined) profileUpdates.password = updates.password
+      if (updates.user_role !== undefined) profileUpdates.user_role = updates.user_role
+      if (updates.pin !== undefined) profileUpdates.pin = updates.pin
+      if (updates.bio !== undefined) profileUpdates.bio = updates.bio
+      if (updates.avatar_url !== undefined) profileUpdates.avatar_url = updates.avatar_url
+
+      const editUserData: EditUser = {
+        id: String(userId),
+        data: updates
+      }
+
+      const result = await profileRequests.editProfile(editUserData)
+      
+      // Check if the update was successful
+      if (result.error) {
+        throw new Error(result.error)
+      }
+
+      // Refresh current user if it's the one being updated
+      if (user.value?.id === userId) {
+        await getUser('id', userId.toString())
+      }
+
+      return true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      useErrorStore().setError({ 
+        error: error.message || 'Failed to update user', 
+        customCode: error.status || 500 
+      })
+      return false
+    }
+  }
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const deleteData: DeleteUser = {
+        id: userId
+      }
+
+      await profileRequests.deleteProfile(deleteData)
+
+      // Refresh users list
+      await getUsers()
+
+      return true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      useErrorStore().setError({ 
+        error: error.message || 'Failed to delete user', 
+        customCode: error.status || 500 
+      })
+      return false
     }
   }
 
   return {
+    // State
     users,
     user,
+
+    // Getters
     getUsers,
     getUser,
-    updateUser
+
+    // Actions
+    createUser,
+    updateUser,
+    deleteUser
   }
 })

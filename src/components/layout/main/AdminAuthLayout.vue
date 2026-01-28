@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { menuKey } from '@/providers/injectionKeys'
+import { useTabSheetStore } from '@/stores/tabSheet'
 
 const { pageData } = storeToRefs(usePageStore())
+const tabSheetStore = useTabSheetStore()
 
 const taskSheetOpen = ref({ user: false, tab: false, drink: false })
 
@@ -30,8 +32,11 @@ provide(menuKey, {
   <div>
     <Sidebar @userClicked="userClicked" @tabClicked="tabClicked" @drinkClicked="drinkClicked" />
     <AppNewUser v-model="taskSheetOpen.user" />
+    <AppNewTab v-model="taskSheetOpen.tab" />
     <AppNewDrink v-model="taskSheetOpen.drink" />
-    <!-- <AppNewTab v-model="taskSheetOpen.tab" /> -->
+
+    <!-- Global Tab Sheet -->
+    <TabSheet />
 
     <div
       class="flex flex-col transition-[margin]"

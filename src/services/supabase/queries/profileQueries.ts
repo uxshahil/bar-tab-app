@@ -16,3 +16,4 @@ export const updateUserQuery = (updatedUser = {} as Partial<Profile>, id: string
   .from('profile')
   .update(updatedUser)
   .eq('id', id)
+

@@ -301,6 +301,233 @@ export type Database = {
         }
         Relationships: []
       }
+      tab: {
+        Row: {
+          bar_id: number
+          created_at: string
+          id: number
+          is_split: boolean
+          settled_at: string | null
+          special_notes: string | null
+          split_count: number | null
+          status: string
+          subtotal: number
+          tab_number: string
+          tax_amount: number
+          tip_amount: number | null
+          total_before_tip: number
+          total_owed: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bar_id: number
+          created_at?: string
+          id?: number
+          is_split?: boolean
+          settled_at?: string | null
+          special_notes?: string | null
+          split_count?: number | null
+          status?: string
+          subtotal?: number
+          tab_number: string
+          tax_amount?: number
+          tip_amount?: number | null
+          total_before_tip?: number
+          total_owed?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bar_id?: number
+          created_at?: string
+          id?: number
+          is_split?: boolean
+          settled_at?: string | null
+          special_notes?: string | null
+          split_count?: number | null
+          status?: string
+          subtotal?: number
+          tab_number?: string
+          tax_amount?: number
+          tip_amount?: number | null
+          total_before_tip?: number
+          total_owed?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tab_bar_id_fkey"
+            columns: ["bar_id"]
+            isOneToOne: false
+            referencedRelation: "bar"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tab_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tab_item: {
+        Row: {
+          created_at: string
+          id: number
+          item_total: number
+          menu_item_id: number
+          quantity: number
+          special_instructions: string | null
+          tab_id: number
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          item_total: number
+          menu_item_id: number
+          quantity: number
+          special_instructions?: string | null
+          tab_id: number
+          unit_price: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          item_total?: number
+          menu_item_id?: number
+          quantity?: number
+          special_instructions?: string | null
+          tab_id?: number
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tab_item_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_item"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tab_item_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "tab"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tab_payment: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          id: number
+          payment_method: string
+          split_id: number | null
+          status: string
+          tab_id: number
+          tip_added: number | null
+        }
+        Insert: {
+          amount_paid: number
+          created_at?: string
+          id?: number
+          payment_method?: string
+          split_id?: number | null
+          status?: string
+          tab_id: number
+          tip_added?: number | null
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          id?: number
+          payment_method?: string
+          split_id?: number | null
+          status?: string
+          tab_id?: number
+          tip_added?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tab_payment_split_id_fkey"
+            columns: ["split_id"]
+            isOneToOne: false
+            referencedRelation: "tab_split"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tab_payment_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "tab"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tab_split: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          id: number
+          items_included: string[]
+          settled_at: string | null
+          split_number: number
+          status: string
+          subtotal: number
+          tab_id: number
+          tax_on_split: number
+          tip_amount: number | null
+          total_owed: number
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          id?: number
+          items_included?: string[]
+          settled_at?: string | null
+          split_number: number
+          status?: string
+          subtotal: number
+          tab_id: number
+          tax_on_split: number
+          tip_amount?: number | null
+          total_owed: number
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          id?: number
+          items_included?: string[]
+          settled_at?: string | null
+          split_number?: number
+          status?: string
+          subtotal?: number
+          tab_id?: number
+          tax_on_split?: number
+          tip_amount?: number | null
+          total_owed?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tab_split_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "tab"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
