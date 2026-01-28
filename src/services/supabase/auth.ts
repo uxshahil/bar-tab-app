@@ -23,7 +23,7 @@ export const register = async (formData: RegisterForm) => {
       username: formData.username,
       password: formData.password,
       full_name: formData.firstName.concat(' ', formData.lastName),
-      roles: [formData?.role],
+      user_role: formData.role,
       pin: generatePin(formData.role),
       email: formData.email
     })
@@ -37,7 +37,7 @@ export const register = async (formData: RegisterForm) => {
 export const posLogin = async (formData: PosLoginForm) => {
   const { data: profileData, error: profileError } = await supabase
     .from('profile')
-    .select('id, username, full_name, roles, email, password')
+    .select('id, username, full_name, user_role, email, password')
     .eq('pin', formData?.pin)
     .eq('active', true)
     .single()

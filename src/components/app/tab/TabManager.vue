@@ -89,7 +89,7 @@
             type="number"
             name="quantity"
             label="Quantity"
-            :value="1"
+            value="1"
             validation="required|min:1"
           />
           <FormKit
@@ -113,7 +113,7 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import type { Tab } from '@/services/supabase/types/tabTypes'
+
 
 const tabsStore = useTabsStore()
 const drinksStore = useDrinksStore()
@@ -142,6 +142,7 @@ const drinkOptions = computed(() =>
 const createNewTab = async (formData: any) => {
   const tabId = await tabsStore.createTab({
     user_id: formData.user_id,
+    bar_id: 1,
     tab_number: formData.tab_number,
     special_notes: formData.special_notes || null,
     status: 'open',
@@ -150,7 +151,7 @@ const createNewTab = async (formData: any) => {
     total_before_tip: 0,
     tip_amount: 0,
     total_owed: 0,
-  } as Partial<Tab>)
+  })
 
   if (tabId) {
     await tabsStore.getTab(tabId.toString())
@@ -180,7 +181,7 @@ const addItemToTab = async (formData: any) => {
 
   // Update tab totals
   const newSubtotal = currentTab.value.subtotal + itemTotal
-  const newTotal = newSubtotal + currentTab.value.tax_amount + currentTab.value.tip_amount
+  const newTotal = (newSubtotal || 0) + (currentTab.value?.tax_amount || 0) + (currentTab.value?.tip_amount || 0)
 
   await tabsStore.updateTab(currentTab.value.id, {
     subtotal: newSubtotal,
@@ -197,4 +198,3 @@ onMounted(async () => {
   await tabsStore.getOpenTabs()
 })
 </script>
-</template>

@@ -20,10 +20,7 @@ const formatCurrency = (amount: number) => {
   }).format(amount)
 }
 
-// Calculate tax (15% VAT)
-const calculateTax = (subtotal: number) => {
-  return subtotal * 0.15
-}
+
 
 onMounted(async () => {
   await tabsStore.getTab(props.tabId.toString())

@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:clean": "rm -rf .vite node_modules package-lock.json",
+    "dev:fresh": "npm run db:reset && npm run db:seed && npm run supabase:types && npm run dev",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -20,8 +22,7 @@
     "supabase:types": "dotenv -e .env -- sh -c 'supabase gen types typescript --project-id $SUPABASE_PROJECT_REF --schema public > database/types.ts'",
     "db:migrate:new": "supabase migration new",
     "db:reset": "supabase db reset --linked",
-    "db:seed": "dotenv -e .env -- node database/seed.js",
-    "clean": "rm -rf .vite node_modules package-lock.json"
+    "db:seed": "dotenv -e .env -- node database/seed.js"
   },
   "dependencies": {
     "@formkit/core": "latest",

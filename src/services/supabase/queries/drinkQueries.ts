@@ -21,7 +21,7 @@ export const fetchDrinks = (search?: string | '*') => {
 
 export const drinkQuery = (slug: string) => supabase
   .from('menu_item')
-  .select(`*`)
+  .select(`*, category (name, slug, menu (name, slug))`)
   .eq('slug', slug)
   .single()
 

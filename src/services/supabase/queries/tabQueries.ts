@@ -1,5 +1,5 @@
 import { supabase } from '@/providers/supabaseClient'
-import type { Tab, TabItem, TabSplit, TabPayment } from '@/services/supabase/types/tabTypes'
+import type { Tab, TabItem, TabSplit, TabInsert, TabItemInsert, TabPaymentInsert, TabSplitInsert } from '@/services/supabase/types/tabTypes'
 
 // Fetch all tabs (visible to all users)
 export const tabsQuery = () => supabase
@@ -55,7 +55,7 @@ export const tabPaymentsQuery = (tabId: string | number) => supabase
   .order('created_at', { ascending: false })
 
 // Create a new tab
-export const createTabQuery = (tabData: Partial<Tab>) => supabase
+export const createTabQuery = (tabData: TabInsert) => supabase
   .from('tab')
   .insert(tabData)
   .select()
@@ -68,7 +68,7 @@ export const updateTabQuery = (tabId: string | number, updates: Partial<Tab>) =>
   .select()
 
 // Add item to tab
-export const addTabItemQuery = (itemData: Partial<TabItem>) => supabase
+export const addTabItemQuery = (itemData: TabItemInsert) => supabase
   .from('tab_item')
   .insert(itemData)
   .select()
@@ -77,17 +77,21 @@ export const addTabItemQuery = (itemData: Partial<TabItem>) => supabase
 export const updateTabItemQuery = (itemId: string | number, updates: Partial<TabItem>) => supabase
   .from('tab_item')
   .update(updates)
-  .eq('id', itemId)
+  .eq('id', Number(itemId)) // Fix: Explicitly cast to Number
   .select()
 
-// Delete tab item
 export const deleteTabItemQuery = (itemId: string | number) => supabase
   .from('tab_item')
   .delete()
-  .eq('id', itemId)
+  .eq('id', Number(itemId)) // Fix: Explicitly cast to Number
+
+export const createTabPaymentQuery = (paymentData: TabPaymentInsert) => supabase
+  .from('tab_payment')
+  .insert(paymentData)
+  .select()
 
 // Create tab split
-export const createTabSplitQuery = (splitData: Partial<TabSplit>) => supabase
+export const createTabSplitQuery = (splitData: TabSplitInsert) => supabase
   .from('tab_split')
   .insert(splitData)
   .select()
@@ -96,11 +100,5 @@ export const createTabSplitQuery = (splitData: Partial<TabSplit>) => supabase
 export const updateTabSplitQuery = (splitId: string | number, updates: Partial<TabSplit>) => supabase
   .from('tab_split')
   .update(updates)
-  .eq('id', splitId)
-  .select()
-
-// Create payment
-export const createTabPaymentQuery = (paymentData: Partial<TabPayment>) => supabase
-  .from('tab_payment')
-  .insert(paymentData)
+  .eq('id', splitId as number)
   .select()

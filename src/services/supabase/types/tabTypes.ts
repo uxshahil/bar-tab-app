@@ -56,6 +56,23 @@ export type TabPayment = {
 
 export type TabPayments = TabPayment[]
 
+// Add these to tabTypes.ts
+export type TabInsert = {
+  user_id: string
+  bar_id: number
+  tab_number: string
+  status?: string
+  subtotal?: number
+  tax_amount?: number
+  tip_amount?: number
+  total_owed?: number
+  // add other table columns here
+}
+
+export type TabItemInsert = Omit<TabItem, 'id' | 'created_at' | 'updated_at'>
+export type TabSplitInsert = Omit<TabSplit, 'id' | 'created_at' | 'updated_at'>
+export type TabPaymentInsert = Omit<TabPayment, 'id' | 'created_at'>
+
 // Enums for status values
 export enum TabStatus {
   OPEN = 'open',

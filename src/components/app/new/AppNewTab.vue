@@ -23,9 +23,9 @@ const createTab = async (formData: Partial<Tab>) => {
   if (!formData.user_id || !formData.tab_number) return
 
   const tabId = await tabsStore.createTab({
-    user_id: formData.user_id,
+    user_id: formData.user_id!,
     bar_id: 1,
-    tab_number: formData.tab_number,
+    tab_number: formData.tab_number!,
     special_notes: formData.special_notes || null,
     status: 'open',
     subtotal: 0,
@@ -33,7 +33,7 @@ const createTab = async (formData: Partial<Tab>) => {
     total_before_tip: 0,
     tip_amount: 0,
     total_owed: 0,
-  } as Partial<Tab>)
+  })
 
   if (tabId) {
     sheetOpen.value = false

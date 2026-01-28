@@ -16,7 +16,7 @@ import {
   createTabPaymentQuery
 } from '@/services/supabase/queries/tabQueries'
 import { useMemoize } from '@vueuse/core'
-import type { Tab, Tabs, TabItem, TabItems, TabSplit, TabSplits, TabPayment, TabPayments } from '@/services/supabase/types/tabTypes'
+import type { Tab, Tabs, TabItem, TabItems, TabSplit, TabSplits, TabPayments, TabSplitInsert } from '@/services/supabase/types/tabTypes'
 import type { PostgrestSingleResponse } from '@supabase/supabase-js'
 
 export const useTabsStore = defineStore('tabs-store', () => {
@@ -233,8 +233,9 @@ export const useTabsStore = defineStore('tabs-store', () => {
   }
 
   // Create new tab
-  const createTab = async (tabData: Partial<Tab>) => {
-    const { data, error, status } = await createTabQuery(tabData)
+  const createTab = async (tabData: { user_id: string; bar_id: number; tab_number: string; special_notes?: string | null; status?: string; subtotal?: number; tax_amount?: number; total_before_tip?: number; tip_amount?: number; total_owed?: number }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error, status } = await createTabQuery(tabData as any)
 
     if (error) {
       useErrorStore().setError({ error, customCode: status })
@@ -265,8 +266,9 @@ export const useTabsStore = defineStore('tabs-store', () => {
   }
 
   // Add item to tab
-  const addTabItem = async (itemData: Partial<TabItem>) => {
-    const { data, error, status } = await addTabItemQuery(itemData)
+  const addTabItem = async (itemData: { tab_id: number; menu_item_id: number; quantity: number; unit_price: number; item_total: number; special_instructions?: string | null }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error, status } = await addTabItemQuery(itemData as any)
 
     if (error) {
       useErrorStore().setError({ error, customCode: status })
@@ -318,7 +320,7 @@ export const useTabsStore = defineStore('tabs-store', () => {
   }
 
   // Create tab split
-  const createTabSplit = async (splitData: Partial<TabSplit>) => {
+  const createTabSplit = async (splitData: TabSplitInsert) => {
     const { data, error, status } = await createTabSplitQuery(splitData)
 
     if (error) {
@@ -356,8 +358,8 @@ export const useTabsStore = defineStore('tabs-store', () => {
   }
 
   // Create payment
-  const createPayment = async (paymentData: Partial<TabPayment>) => {
-    const { data, error, status } = await createTabPaymentQuery(paymentData)
+  const createPayment = async (paymentData: { tab_id: number; amount_paid: number; payment_method: string; status?: string; split_id?: number | null; tip_added?: number | null }) => {
+    const { data, error, status } = await createTabPaymentQuery(paymentData as any)
 
     if (error) {
       useErrorStore().setError({ error, customCode: status })

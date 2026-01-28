@@ -18,7 +18,6 @@ declare module 'vue' {
     AppInPlaceEditStatus: typeof import('./src/components/app/inPlaceEdit/AppInPlaceEditStatus.vue')['default']
     AppInPlaceEditText: typeof import('./src/components/app/inPlaceEdit/AppInPlaceEditText.vue')['default']
     AppInPlaceEditTextArea: typeof import('./src/components/app/inPlaceEdit/AppInPlaceEditTextArea.vue')['default']
-    'AppNew[temp]': typeof import('./src/components/app/new/AppNew[temp].vue')['default']
     AppNewDrink: typeof import('./src/components/app/new/AppNewDrink.vue')['default']
     AppNewTab: typeof import('./src/components/app/new/AppNewTab.vue')['default']
     AppNewUser: typeof import('./src/components/app/new/AppNewUser.vue')['default']
