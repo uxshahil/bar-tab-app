@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { useTabsStore } from '@/stores/loaders/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   tabId: number

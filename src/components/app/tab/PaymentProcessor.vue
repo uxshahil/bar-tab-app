@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { useTabsStore } from '@/stores/loaders/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog'
 import { storeToRefs } from 'pinia'
 
 interface Props {

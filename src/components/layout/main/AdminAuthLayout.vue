@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { menuKey } from '@/providers/injectionKeys'
-import { useTabSheetStore } from '@/stores/tabSheet'
 
 const { pageData } = storeToRefs(usePageStore())
-const tabSheetStore = useTabSheetStore()
 
 const taskSheetOpen = ref({ user: false, tab: false, drink: false })
 

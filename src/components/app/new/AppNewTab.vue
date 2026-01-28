@@ -2,8 +2,7 @@
 import { useTabsStore } from '@/stores/loaders/tabs'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import type { Tab } from '@/services/supabase/types/tabTypes'
 
 const sheetOpen = defineModel<boolean>()
@@ -21,14 +20,11 @@ const generateTabNumber = () => {
 }
 
 const createTab = async (formData: Partial<Tab>) => {
-  if (!formData.user_id || !formData.tab_number) {
-    console.error('Missing required fields')
-    return
-  }
+  if (!formData.user_id || !formData.tab_number) return
 
   const tabId = await tabsStore.createTab({
     user_id: formData.user_id,
-    bar_id: formData.bar_id || null,
+    bar_id: 1,
     tab_number: formData.tab_number,
     special_notes: formData.special_notes || null,
     status: 'open',
@@ -62,7 +58,6 @@ const createTab = async (formData: Partial<Tab>) => {
         :value="{
           tab_number: generateTabNumber(),
           user_id: profile?.id || '',
-          bar_id: '',
           special_notes: '',
         }"
       >
@@ -98,15 +93,6 @@ const createTab = async (formData: Partial<Tab>) => {
           validation="length:0,500"
           :rows="3"
         />
-
-        <FormKit type="hidden" name="bar_id" id="bar_id" value="" />
-
-        <div class="flex gap-2 pt-4">
-          <FormKit type="submit" :classes="{ input: 'flex-1' }" />
-          <SheetClose as-child>
-            <Button variant="outline" class="flex-1">Cancel</Button>
-          </SheetClose>
-        </div>
       </FormKit>
     </SheetContent>
   </Sheet>

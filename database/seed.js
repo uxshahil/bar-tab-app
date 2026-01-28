@@ -115,9 +115,9 @@ const seedBars = async (barNames) => {
     return { name: name, slug: toSlug(name) }
   })
 
-  bars.push({ name: 'VueSchools', slug: toSlug('VueSchools') })
+  const testBar = { name: 'VueSchools', slug: toSlug('VueSchools') }
 
-  const { data, error } = await supabase.from('bar').insert(bars).select('id')
+  const { data, error } = await supabase.from('bar').insert([testBar, ...bars]).select('id')
 
   if (error) return logErrorAndExit('Bars', error)
 
