@@ -21,6 +21,9 @@ export type TabItem = {
   special_instructions: string | null
   created_at: string
   updated_at: string
+  menu_item?: {
+    name: string
+  }
 }
 
 export type TabItems = TabItem[]

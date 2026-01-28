@@ -3,6 +3,7 @@ import type { Drinks } from '@/services/supabase/types/drinkTypes'
 import { RouterLink } from 'vue-router'
 import { h } from 'vue'
 import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
+import { Button } from '@/components/ui/button'
 
 const { updateDrink, deleteDrink } = useDrinksStore();
 
@@ -49,12 +50,24 @@ export const columns: ColumnDef<Drinks[0]>[] = [
       id: 'actions',
       header: () => h('div', { class: 'text-left' }, 'Actions'),
       enableHiding: false,
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
         const drink = row.original
   
-        return h('div', { class: 'relative' },
+        return h('div', { class: 'flex items-center gap-2' }, [
+          h(Button, { 
+            variant: 'outline', 
+            size: 'sm',
+            class: 'h-8 px-2 lg:px-3',
+            onClick: () => {
+              // @ts-ignore - Custom meta property
+              table.options.meta?.onAddToTab?.(drink)
+            }
+          }, () => [
+            h('iconify-icon', { icon: 'lucide:plus', class: 'mr-2 h-4 w-4' }),
+            'Add'
+          ]),
           h(DropdownAction, { object: { id: drink.id, name: drink.name, editFn: updateDrink, deleteFn: deleteDrink } })
-        )
+        ])
       }
     },
 ]

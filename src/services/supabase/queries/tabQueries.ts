@@ -36,7 +36,7 @@ export const openTabsQuery = () => supabase
 // Fetch tab items for a specific tab
 export const tabItemsQuery = (tabId: string | number) => supabase
   .from('tab_item')
-  .select('*')
+  .select('*, menu_item(name)')
   .eq('tab_id', Number(tabId))
   .order('created_at', { ascending: true })
 

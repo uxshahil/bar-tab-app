@@ -41,7 +41,7 @@
     "lucide-vue-next": "^0.563.0",
     "pinia": "^3.0.4",
     "radix-vue": "^1.8.5",
-    "reka-ui": "^2.7.0",
+    "reka-ui": "^2.8.0",
     "slugify": "^1.6.6",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "latest",
