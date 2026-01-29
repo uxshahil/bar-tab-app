@@ -647,14 +647,15 @@ export const useTabsStore = defineStore('tabs-store', () => {
     updateDrinkInTab: _updateDrinkInTab,
 
     // Checkout Tab
-    checkoutTab: async (tabId: number, totals: { subtotal: number, tax_amount: number, total_before_tip: number, total_owed: number }) => {
-      const { subtotal, tax_amount, total_before_tip, total_owed } = totals
+    checkoutTab: async (tabId: number, totals: { subtotal: number, tax_amount: number, total_before_tip: number, total_owed: number, tip_amount: number }) => {
+      const { subtotal, tax_amount, total_before_tip, total_owed, tip_amount } = totals
       
       const success = await updateTab(tabId, {
         subtotal,
         tax_amount,
         total_before_tip,
         total_owed,
+        tip_amount,
         status: 'closed',
         settled_at: new Date().toISOString()
       })

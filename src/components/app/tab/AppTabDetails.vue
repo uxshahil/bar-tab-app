@@ -3,6 +3,7 @@ import { useTabsStore } from '@/stores/loaders/tabs'
 import { storeToRefs } from 'pinia'
 import { profileQuery } from '@/services/supabase/queries/profileQueries'
 import type { Profile } from '@/services/supabase/types/profileTypes'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 const tabsStore = useTabsStore()
 const { tab, tabItems, tabSplits, tabPayments } = storeToRefs(tabsStore)
@@ -106,21 +107,25 @@ const handleScroll = () => {
 }
 
 // Computed Totals
-const calculatedSubtotal = computed(() => {
+const calculatedTotalBeforeTip = computed(() => {
   if (!tabItems.value) return 0
   return tabItems.value.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
 })
 
-const calculatedTax = computed(() => {
-  return calculatedSubtotal.value * 0.15
+const calculatedSubtotal = computed(() => {
+  return calculatedTotalBeforeTip.value / 1.15
 })
 
-const calculatedTotalBeforeTip = computed(() => {
-  return calculatedSubtotal.value + calculatedTax.value
+const calculatedTax = computed(() => {
+  return calculatedTotalBeforeTip.value - calculatedSubtotal.value
 })
 
 const calculatedTotalOwed = computed(() => {
   return calculatedTotalBeforeTip.value + (Number(tab.value?.tip_amount) || 0)
+})
+
+const totalPaid = computed(() => {
+  return tabPayments.value?.reduce((sum, p) => sum + (Number(p.amount_paid) || 0), 0) || 0
 })
 
 const handleCheckout = async () => {
@@ -134,11 +139,31 @@ const handleCheckout = async () => {
     return
   }
 
+  // Enforce Payment Validation
+  const totalDue = currentViewTotals.value.totalBeforeTip
+  const paid = totalPaid.value
+  
+  if (paid < totalDue) {
+    alert(`Cannot close tab. Payment incomplete.\nPaid: ${formatCurrency(paid)}\nDue: ${formatCurrency(totalDue)}\nremaining: ${formatCurrency(totalDue - paid)}`)
+    return
+  }
+
+  // Calculate final tip and total owed
+  // If paid > due, difference is tip
+  const finalTip = paid > totalDue ? paid - totalDue : 0
+  const finalTotalOwed = paid
+
+  // Confirm closure
+  if (!confirm(`Closing tab with:\nTotal: ${formatCurrency(totalDue)}\nTips: ${formatCurrency(finalTip)}\nTotal Paid: ${formatCurrency(paid)}`)) {
+    return
+  }
+
   const success = await tabsStore.checkoutTab(tab.value.id, {
     subtotal: currentViewTotals.value.subtotal,
     tax_amount: currentViewTotals.value.tax,
     total_before_tip: currentViewTotals.value.totalBeforeTip,
-    total_owed: currentViewTotals.value.totalOwed
+    total_owed: finalTotalOwed,
+    tip_amount: finalTip
   })
 
   if (success) {
@@ -148,12 +173,7 @@ const handleCheckout = async () => {
 }
 
 // Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+import { formatCurrency } from '@/utils/currency'
 
 import { useNow } from '@vueuse/core'
 const now = useNow()
@@ -245,9 +265,9 @@ const currentViewTotals = computed(() => {
     itemsToSum = tabItems.value || []
   }
 
-  const subtotal = itemsToSum.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
-  const tax = subtotal * 0.15
-  const totalBeforeTip = subtotal + tax
+  const totalBeforeTip = itemsToSum.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
+  const subtotal = totalBeforeTip / 1.15
+  const tax = totalBeforeTip - subtotal
   // If viewing a specific split, use its total_owed if available, otherwise calc
   // But for dynamic view, let's calc fresh
   const totalOwed = totalBeforeTip + (selectedSplitId.value === null ? (Number(tab.value?.tip_amount) || 0) : 0) // Only add main tip to main view for now
@@ -280,13 +300,40 @@ const updateQuantity = async (item: any, change: number) => {
 }
 
 import ItemRow from './ItemRow.vue'
+import AppReceipt from './AppReceipt.vue'
+
+const showReceipt = ref(false)
+
+const handleEmailReceipt = () => {
+    // In a real app, this would send an API request
+    // For now, we simulate a successful send after seeing the preview
+    // We could use window.print() here on the receipt element
+    showReceipt.value = true
+}
+
+const sendEmail = () => {
+    alert(`Receipt sent to user@example.com (Simulated)`)
+    showReceipt.value = false
+}
 </script>
 
 <template>
   <div v-if="tab" class="space-y-6 p-4">
     <!-- Tab Header -->
     <div class="border-b pb-4">
-      <div class="flex justify-between items-start">
+      <div class="flex justify-between items-start flex-col">
+        <div class="text-right space-y-2 mb-4">
+          <div class="flex justify-end gap-2">
+            <Button variant="outline" size="sm" @click="handleEmailReceipt">
+              <iconify-icon icon="lucide:mail" class="mr-2 h-4 w-4" />
+              Email Receipt
+            </Button>
+            <Button variant="outline" size="sm" @click="isSplitBillOpen = true">
+              <iconify-icon icon="lucide:split" class="mr-2 h-4 w-4" />
+              Split Bill
+            </Button>
+          </div>
+        </div>
         <div>
           <h2 class="text-2xl font-bold">{{ tab.tab_number }}</h2>
           <div class="flex items-center gap-2 mt-1">
@@ -295,18 +342,6 @@ import ItemRow from './ItemRow.vue'
             <span class="text-muted-foreground mx-1">•</span>
             <iconify-icon icon="lucide:clock" class="text-muted-foreground text-xs" />
             <span class="font-mono text-sm font-medium">{{ getTabDuration(tab.created_at) }}</span>
-          </div>
-        </div>
-        <div class="text-right space-y-2">
-          <div class="flex justify-end gap-2">
-            <Button variant="outline" size="sm" @click="isSplitBillOpen = true">
-              <iconify-icon icon="lucide:split" class="mr-2 h-4 w-4" />
-              Split Bill
-            </Button>
-          </div>
-          <div class="text-xs text-muted-foreground">
-            <p>Tab ID: {{ tab.id }}</p>
-            <p>Created: {{ new Date(tab.created_at).toLocaleDateString() }}</p>
           </div>
         </div>
       </div>
@@ -324,6 +359,11 @@ import ItemRow from './ItemRow.vue'
         <Badge variant="outline" class="text-[10px] h-5 ml-1 capitalize">
           {{ staffProfile.user_role?.replace('_', ' ') || 'Staff' }}
         </Badge>
+      </div>
+
+      <div class="text-xs text-muted-foreground flex flex-col mt-4">
+        <p>Created: {{ new Date(tab.created_at).toLocaleDateString() }}</p>
+        <p>Tab ID: {{ tab.id }}</p>
       </div>
 
       <div class="mt-4">
@@ -365,8 +405,8 @@ import ItemRow from './ItemRow.vue'
       <Button 
         variant="outline" 
         size="sm" 
-        class="h-7 px-2 text-xs font-bold min-w-[3rem]"
-        :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': selectedSplitId === null }"
+        class="h-7 px-2 text-xs font-bold min-w-[3rem] text-muted-foreground cursor-pointer"
+        :class="{ 'text-secondary-foreground hover:bg-primary/90': selectedSplitId === null }"
         @click="selectedSplitId = null"
       >
         ALL
@@ -376,8 +416,8 @@ import ItemRow from './ItemRow.vue'
         :key="split.id"
         variant="outline"
         size="sm"
-        class="h-7 px-2 text-xs font-bold min-w-[2.5rem]"
-        :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': selectedSplitId === split.id }"
+        class="h-7 px-2 text-xs font-bold min-w-[2.5rem] text-muted-foreground cursor-pointer"
+        :class="{ 'text-secondary-foreground hover:bg-primary/90': selectedSplitId === split.id }"
         @click="selectedSplitId = split.id"
       >
         S{{ split.split_number }}
@@ -516,6 +556,7 @@ import ItemRow from './ItemRow.vue'
           class="w-full" 
           size="lg" 
           @click="handleCheckout"
+          :disabled="currentViewTotals.totalOwed === 0.00"
         >
           <iconify-icon icon="lucide:check-circle" class="mr-2" />
           {{ selectedSplitId ? `Pay Split ${tabSplits?.find(s => s.id === selectedSplitId)?.split_number}` : 'Checkout & Close Tab' }}
@@ -541,4 +582,26 @@ import ItemRow from './ItemRow.vue'
       </div>
     </div>
   </div>
+
+  <!-- Receipt Dialog -->
+  <Dialog v-model:open="showReceipt">
+    <DialogContent class="max-w-[360px] p-0 bg-transparent border-0 shadow-none">
+        <div class="relative">
+            <AppReceipt 
+                v-if="tab && tabItems"
+                :tab="tab"
+                :items="tabItems" 
+            />
+            <div class="absolute -bottom-12 left-0 right-0 flex justify-center gap-2">
+                <Button @click="sendEmail" class="shadow-lg">
+                    <iconify-icon icon="lucide:send" class="mr-2" />
+                    Send
+                </Button>
+                 <Button variant="secondary" @click="showReceipt = false" class="shadow-lg">
+                    Close
+                </Button>
+            </div>
+        </div>
+    </DialogContent>
+  </Dialog>
 </template>

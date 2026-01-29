@@ -23,6 +23,7 @@ declare module 'vue' {
     AppNewDrink: typeof import('./src/components/app/new/AppNewDrink.vue')['default']
     AppNewTab: typeof import('./src/components/app/new/AppNewTab.vue')['default']
     AppNewUser: typeof import('./src/components/app/new/AppNewUser.vue')['default']
+    AppReceipt: typeof import('./src/components/app/tab/AppReceipt.vue')['default']
     AppRightSidebar: typeof import('./src/components/layout/AppRightSidebar.vue')['default']
     AppSplitBillSheet: typeof import('./src/components/app/tab/AppSplitBillSheet.vue')['default']
     AppTabDetails: typeof import('./src/components/app/tab/AppTabDetails.vue')['default']

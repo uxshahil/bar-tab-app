@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { formatCurrency } from '@/utils/currency'
 
 import { useAuthStore } from '@/stores/auth'
 import { todaysTabsCountQuery } from '@/services/supabase/queries/tabQueries'
@@ -63,12 +64,7 @@ const createNewTab = async () => {
   }
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+
 </script>
 
 <template>

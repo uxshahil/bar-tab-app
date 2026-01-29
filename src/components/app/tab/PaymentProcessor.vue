@@ -8,6 +8,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 import { storeToRefs } from 'pinia'
+import { formatCurrency } from '@/utils/currency'
 
 interface Props {
   tabId: number
@@ -80,12 +81,7 @@ const processPayment = async () => {
   }
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+
 </script>
 
 <template>

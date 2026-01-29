@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { useNow } from '@vueuse/core'
+import { formatCurrency } from '@/utils/currency'
 
 const props = defineProps<{
   item: any
@@ -20,13 +21,7 @@ const emit = defineEmits<{
   (e: 'updateQuantity', item: any, change: number): void
 }>()
 
-// Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+
 
 const now = useNow()
 

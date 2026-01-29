@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 
 const { updateDrink, deleteDrink } = useDrinksStore();
 
+import { formatCurrency } from '@/utils/currency'
+
 export const columns: ColumnDef<Drinks[0]>[] = [
   {
     accessorKey: 'menu',
@@ -39,10 +41,7 @@ export const columns: ColumnDef<Drinks[0]>[] = [
     header: () => h('div', { class: 'text-left' }, 'Price'),
     cell: ({ row }) => {
       const amount = Number.parseFloat(row.getValue('price'))
-      const formatted = new Intl.NumberFormat('en-ZA', {
-        style: 'currency',
-        currency: 'ZAR',
-      }).format(amount)
+      const formatted = formatCurrency(amount)
       return h('div', { class: 'text-right font-medium' }, formatted)
     },
   },

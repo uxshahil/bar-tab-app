@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTabsStore } from '@/stores/loaders/tabs'
 import { storeToRefs } from 'pinia'
+import { formatCurrency } from '@/utils/currency'
 
 const props = defineProps<{
   tabId: string | number
@@ -88,13 +89,7 @@ const getSplitForItem = (itemId: number) => {
   return split ? split.id.toString() : ''
 }
 
-// Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+
 
 watch(isOpen, async (newVal) => {
   if (newVal) {
@@ -115,9 +110,13 @@ watch(isOpen, async (newVal) => {
         </SheetDescription>
       </SheetHeader>
 
-      <div class="mt-6 space-y-6">
+      <div class="mt-6 space-y-6 px-4">
         <!-- Splits Summary -->
         <div class="flex gap-2 overflow-x-auto pb-2">
+          <Button variant="outline" class="h-auto min-w-[100px]" @click="createNewSplit" :disabled="loading">
+            <iconify-icon icon="lucide:plus" class="mr-2" />
+            Add Split
+          </Button>
           <div 
             v-for="split in tabSplits" 
             :key="split.id"
@@ -127,10 +126,6 @@ watch(isOpen, async (newVal) => {
             <div class="text-lg font-bold mt-1">{{ formatCurrency(split.total_owed) }}</div>
             <div class="text-xs text-muted-foreground capitalize">{{ split.status }}</div>
           </div>
-          <Button variant="outline" class="h-auto min-w-[100px]" @click="createNewSplit" :disabled="loading">
-            <iconify-icon icon="lucide:plus" class="mr-2" />
-            Add Split
-          </Button>
         </div>
 
         <!-- Items List -->

@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { Badge } from '@/components/ui/badge'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { formatCurrency } from '@/utils/currency'
 
 const route = useRoute()
 const tabsStore = useTabsStore()
@@ -22,13 +23,7 @@ const filteredTabs = computed(() => {
   )
 })
 
-// Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+
 
 onMounted(() => {
   tabsStore.getOpenTabs()

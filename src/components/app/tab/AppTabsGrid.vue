@@ -3,19 +3,14 @@ import { useTabsStore } from '@/stores/loaders/tabs'
 import { storeToRefs } from 'pinia'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { formatCurrency } from '@/utils/currency'
 
 const tabsStore = useTabsStore()
 const { tabs: activeTabs } = storeToRefs(tabsStore)
 
 defineEmits(['select-tab'])
 
-// Format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-  }).format(amount)
-}
+
 
 // Calculate time open
 const getTimeOpen = (dateString: string) => {
