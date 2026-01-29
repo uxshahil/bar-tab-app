@@ -118,7 +118,6 @@ watchEffect(() => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem @click="$emit('tabClicked')"> Tab </DropdownMenuItem>
           <DropdownMenuItem @click="$emit('userClicked')"> User </DropdownMenuItem>
           <DropdownMenuItem @click="$emit('drinkClicked')"> Drink </DropdownMenuItem>
         </DropdownMenuContent>

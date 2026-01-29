@@ -5,8 +5,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+import { useAuthStore } from '@/stores/auth'
+import { todaysTabsCountQuery } from '@/services/supabase/queries/tabQueries'
+
 const tabsStore = useTabsStore()
+const authStore = useAuthStore()
 const { tabs: openTabs, tab: currentTab } = storeToRefs(tabsStore)
+const { profile } = storeToRefs(authStore)
 const isOpen = ref(false)
 const emit = defineEmits(['tab-selected'])
 
@@ -20,6 +25,42 @@ const selectTab = async (tab: any) => {
   await tabsStore.getTabItems(tab.id.toString())
   emit('tab-selected', tab)
   isOpen.value = false
+}
+
+const createNewTab = async () => {
+  if (!profile.value?.id) return
+
+  // Get count of tabs created today
+  const { count } = await todaysTabsCountQuery()
+  const nextCount = (count || 0) + 1
+  
+  // Format: TAB-MMDD-XXXX
+  const today = new Date()
+  const month = (today.getMonth() + 1).toString().padStart(2, '0')
+  const day = today.getDate().toString().padStart(2, '0')
+  const sequence = nextCount.toString().padStart(4, '0')
+  
+  const tabNumber = `TAB-${month}${day}-${sequence}`
+
+  const tabId = await tabsStore.createTab({
+    user_id: profile.value.id,
+    bar_id: 1, // Default to 1 for now
+    tab_number: tabNumber,
+    status: 'open',
+    subtotal: 0,
+    tax_amount: 0,
+    total_before_tip: 0,
+    tip_amount: 0,
+    total_owed: 0,
+  })
+
+  if (tabId) {
+    await tabsStore.getOpenTabs()
+    const newTab = openTabs.value?.find(t => t.id === tabId)
+    if (newTab) {
+      await selectTab(newTab)
+    }
+  }
 }
 
 const formatCurrency = (amount: number) => {
@@ -78,7 +119,7 @@ const formatCurrency = (amount: number) => {
         </div>
       </div>
       <div class="p-2 border-t bg-muted/20">
-        <Button variant="ghost" class="w-full justify-start text-xs h-8">
+        <Button variant="ghost" class="w-full justify-start text-xs h-8" @click="createNewTab">
           <iconify-icon icon="lucide:plus" class="mr-2 h-3 w-3" />
           Create New Tab
         </Button>

@@ -422,6 +422,13 @@ export type Database = {
             referencedRelation: "tab"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tab_item_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "view_tab_totals"
+            referencedColumns: ["tab_id"]
+          },
         ]
       }
       tab_payment: {
@@ -469,6 +476,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tab"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tab_payment_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "view_tab_totals"
+            referencedColumns: ["tab_id"]
           },
         ]
       }
@@ -526,11 +540,27 @@ export type Database = {
             referencedRelation: "tab"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tab_split_tab_id_fkey"
+            columns: ["tab_id"]
+            isOneToOne: false
+            referencedRelation: "view_tab_totals"
+            referencedColumns: ["tab_id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      view_tab_totals: {
+        Row: {
+          subtotal: number | null
+          tab_id: number | null
+          tax_amount: number | null
+          total_before_tip: number | null
+          total_owed: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

@@ -175,6 +175,7 @@ const splitOptions = computed(() => {
                 v-for="tab in openTabs"
                 :key="tab.id"
                 @click="selectTab(tab)"
+                :v-if="tab.status !== 'closed'"
                 class="p-3 border rounded cursor-pointer hover:bg-muted transition-colors"
               >
                 <div class="flex justify-between items-center">
@@ -221,7 +222,7 @@ const splitOptions = computed(() => {
           <div class="bg-muted p-3 rounded-lg flex justify-between items-center">
             <div>
               <p class="text-xs text-muted-foreground">Selected Tab</p>
-              <p class="font-semibold">{{ currentTab?.tab_number }}</p>
+              <p class="font-semibold">{{ currentTab?.status !== "closed" ? currentTab?.tab_number : null }}</p>
             </div>
             <Button variant="ghost" size="sm" @click="mode = 'select-tab'">Change</Button>
           </div>

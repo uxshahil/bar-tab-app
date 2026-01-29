@@ -33,6 +33,12 @@ export const openTabsQuery = () => supabase
   .eq('status', 'open')
   .order('created_at', { ascending: false })
 
+// Fetch totals for specific tabs
+export const tabTotalsQuery = (tabIds: number[]) => supabase
+  .from('view_tab_totals')
+  .select('*')
+  .in('tab_id', tabIds)
+
 // Fetch tab items for a specific tab
 export const tabItemsQuery = (tabId: string | number) => supabase
   .from('tab_item')
@@ -77,8 +83,12 @@ export const addTabItemQuery = (itemData: TabItemInsert) => supabase
 export const updateTabItemQuery = (itemId: string | number, updates: Partial<TabItem>) => supabase
   .from('tab_item')
   .update(updates)
-  .eq('id', Number(itemId)) // Fix: Explicitly cast to Number
+  .eq('id', Number(itemId))
   .select()
+  .then(res => {
+    if (res.error) console.error('Error updating tab item:', res.error)
+    return res
+  })
 
 export const deleteTabItemQuery = (itemId: string | number) => supabase
   .from('tab_item')
@@ -102,3 +112,14 @@ export const updateTabSplitQuery = (splitId: string | number, updates: Partial<T
   .update(updates)
   .eq('id', splitId as number)
   .select()
+
+// Count tabs created today
+export const todaysTabsCountQuery = () => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  return supabase
+    .from('tab')
+    .select('*', { count: 'exact', head: true })
+    .gte('created_at', today.toISOString())
+}

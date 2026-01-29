@@ -13,11 +13,13 @@ import {
   deleteTabItemQuery,
   createTabSplitQuery,
   updateTabSplitQuery,
-  createTabPaymentQuery
+  createTabPaymentQuery,
+  tabTotalsQuery
 } from '@/services/supabase/queries/tabQueries'
 import { useMemoize } from '@vueuse/core'
 import type { Tab, Tabs, TabItem, TabItems, TabSplit, TabSplits, TabPayments, TabSplitInsert } from '@/services/supabase/types/tabTypes'
 import type { PostgrestSingleResponse } from '@supabase/supabase-js'
+import { useErrorStore } from '@/stores/error'
 
 export const useTabsStore = defineStore('tabs-store', () => {
   // State
@@ -152,26 +154,50 @@ export const useTabsStore = defineStore('tabs-store', () => {
 
   // Get all open tabs
   const getOpenTabs = async () => {
-    tabs.value = null
+    // If we already have tabs, don't re-fetch (User request: only hydrate once)
+    if (tabs.value && tabs.value.length > 0) {
+      return
+    }
 
     const response = await loadOpenTabs('open-tabs')
     const { data, error, status } = response
 
     if (error) useErrorStore().setError({ error, customCode: status })
 
-    if (data) tabs.value = data
+    if (data) {
+      // Helper to merge totals
+      const mergeTotals = async (rawTabs: Tab[]) => {
+        if (!rawTabs || rawTabs.length === 0) return rawTabs
+        const tabIds = rawTabs.map(t => t.id)
+        const { data: totals } = await tabTotalsQuery(tabIds)
+        
+        if (!totals) return rawTabs
+        
+        return rawTabs.map(t => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const total = totals.find((tot: any) => tot.tab_id === t.id)
+          if (total) {
+            return {
+              ...t,
+              subtotal: total.subtotal || 0,
+              tax_amount: total.tax_amount || 0,
+              total_before_tip: total.total_before_tip || 0,
+              total_owed: total.total_owed || 0
+            }
+          }
+          return t
+        })
+      }
 
-    validateCache({ 
-      ref: tabs, 
-      queryFn: () => toPromise(openTabsQuery()),
-      key: 'open-tabs', 
-      loaderFn: loadOpenTabs 
-    })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      tabs.value = await mergeTotals(data) as any
+    }
   }
 
   // Get tab items
   const getTabItems = async (tabId: string) => {
-    tabItems.value = null
+    // Don't clear state to avoid flashing
+    // tabItems.value = null
 
     const response = await loadTabItems(tabId)
     const { data, error, status } = response
@@ -244,7 +270,9 @@ export const useTabsStore = defineStore('tabs-store', () => {
 
     // Clear cache to refetch
     loadTabs.delete('all-tabs')
+    loadOpenTabs.delete('open-tabs')
     await getTabs()
+    await getOpenTabs()
 
     return data?.[0]?.id || null
   }
@@ -316,6 +344,11 @@ export const useTabsStore = defineStore('tabs-store', () => {
     loadTabItems.delete(tabId.toString())
     await getTabItems(tabId.toString())
 
+    // Refresh open tabs to update totals
+    // loadOpenTabs.delete('open-tabs')
+    // await getOpenTabs()
+    // TODO: Update local total instead of refetching
+
     return true
   }
 
@@ -374,12 +407,35 @@ export const useTabsStore = defineStore('tabs-store', () => {
     return data?.[0]?.id || null
   }
 
+  // Helper: Update Local Tab Total
+  const updateLocalTabTotal = (tabId: number, diff: number) => {
+    if (!tabs.value) return
+
+    const tabIndex = tabs.value.findIndex(t => t.id === tabId)
+    if (tabIndex !== -1) {
+      const t = tabs.value[tabIndex]
+      const newSubtotal = (t.subtotal || 0) + diff
+      const newTax = newSubtotal * 0.15
+      const newTotalBeforeTip = newSubtotal + newTax
+      const newTotalOwed = newTotalBeforeTip + (t.tip_amount || 0)
+
+      tabs.value[tabIndex] = {
+        ...t,
+        subtotal: newSubtotal,
+        tax_amount: newTax,
+        total_before_tip: newTotalBeforeTip,
+        total_owed: newTotalOwed
+      }
+    }
+  }
+
   // Helper: Update Drink Logic
   const _updateDrinkInTab = async (params: {
     tabId: number,
     itemId: number,
     updates: { quantity?: number, specialInstructions?: string }
   }) => {
+    console.log('_updateDrinkInTab called with params:', params)
     const { tabId, itemId, updates } = params
 
     // 1. Get current item to calculate differences
@@ -441,9 +497,12 @@ export const useTabsStore = defineStore('tabs-store', () => {
     }
 
     try {
+      console.log('Calling updateTabItem with:', itemId, itemUpdates)
       const success = await updateTabItem(itemId, itemUpdates)
+      console.log('updateTabItem result:', success)
       
       if (!success) {
+        console.warn('Update failed, reverting optimistic update')
         // Revert optimistic update on failure
         Object.assign(currentItem, originalItem)
         if (originalTab && tab.value) {
@@ -452,22 +511,28 @@ export const useTabsStore = defineStore('tabs-store', () => {
         return false
       }
 
-      // 4. Update Tab Totals in DB if quantity changed
-      if (quantityChanged && tab.value) {
-          await updateTab(tabId, {
-          subtotal: tab.value.subtotal,
-          tax_amount: tab.value.tax_amount,
-          total_before_tip: tab.value.total_before_tip,
-          total_owed: tab.value.total_owed
-        })
+      // Force refresh items to ensure UI consistency
+      console.log('Refreshing tab items for tab:', tabId)
+      // Bypass memoization for this refresh to ensure we get the latest DB state
+      loadTabItems.delete(tabId.toString())
+      const { data: freshItems } = await tabItemsQuery(tabId.toString())
+      if (freshItems) {
+        console.log('Fresh items fetched:', freshItems.length)
+        tabItems.value = freshItems
+        // Update the memoized cache too
+        loadTabItems.delete(tabId.toString())
+        // We don't need to re-populate loadTabItems here, next call will fetch
       }
-
-      // Background refresh to ensure consistency (optional but good practice)
-      // We don't await this to keep UI responsive
-      getTabItems(tabId.toString())
+      
+      // Update local open tabs list totals without refetching
+      if (quantityChanged) {
+        const diff = newItemTotal - oldItemTotal
+        updateLocalTabTotal(tabId, diff)
+      }
       
       return true
     } catch (e) {
+      console.error('Exception in _updateDrinkInTab:', e)
       // Revert on error
       Object.assign(currentItem, originalItem)
       if (originalTab && tab.value) {
@@ -530,9 +595,6 @@ export const useTabsStore = defineStore('tabs-store', () => {
         await getTabItems(tabId.toString())
       }
 
-      // REVERTED: Merge on Add logic removed to preserve history
-      // const existingItem = tabItems.value?.find(...)
-
       const itemTotal = quantity * (drink.price || 0)
 
       // 1. Add item to tab
@@ -575,24 +637,37 @@ export const useTabsStore = defineStore('tabs-store', () => {
         }
       }
 
-      // 3. Update main tab totals with Tax Calculation
-      const newSubtotal = (currentTabState.subtotal || 0) + itemTotal
-      const taxRate = 0.15
-      const newTaxAmount = newSubtotal * taxRate
-      const newTotalBeforeTip = newSubtotal + newTaxAmount
-      const newTotalOwed = newTotalBeforeTip + (currentTabState.tip_amount || 0)
+      // Update local open tabs list totals without refetching
+      updateLocalTabTotal(tabId, itemTotal)
 
-      await updateTab(tabId, {
-        subtotal: newSubtotal,
-        tax_amount: newTaxAmount,
-        total_before_tip: newTotalBeforeTip,
-        total_owed: newTotalOwed
-      })
-      
       return true
     },
 
     // Composite Action: Update Drink in Tab
-    updateDrinkInTab: _updateDrinkInTab
+    updateDrinkInTab: _updateDrinkInTab,
+
+    // Checkout Tab
+    checkoutTab: async (tabId: number, totals: { subtotal: number, tax_amount: number, total_before_tip: number, total_owed: number }) => {
+      const { subtotal, tax_amount, total_before_tip, total_owed } = totals
+      
+      const success = await updateTab(tabId, {
+        subtotal,
+        tax_amount,
+        total_before_tip,
+        total_owed,
+        status: 'closed',
+        settled_at: new Date().toISOString()
+      })
+
+      if (success) {
+        // Refresh lists
+        loadTabs.delete('all-tabs')
+        loadOpenTabs.delete('open-tabs')
+        await getTabs()
+        await getOpenTabs()
+      }
+
+      return success
+    }
   }
 })

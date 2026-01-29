@@ -32,6 +32,7 @@ const cancelEditing = () => {
 }
 
 const saveEdit = async (item: any) => {
+  console.log('saveEdit called for item:', item.id, 'with form:', { ...editForm })
   const success = await tabsStore.updateDrinkInTab({
     tabId: Number(props.tabId),
     itemId: item.id,
@@ -43,9 +44,106 @@ const saveEdit = async (item: any) => {
   
   if (success) {
     editingItemId.value = null
+    // Force re-fetch to ensure UI updates
+    await tabsStore.getTabItems(props.tabId.toString())
   } else {
     console.error('Failed to save edit')
     // Optional: Show error toast
+  }
+}
+
+// Watch for changes to debug reactivity
+watch(() => tabItems.value, (newItems) => {
+  console.log('tabItems updated in component:', newItems)
+}, { deep: true })
+
+// Description Editing
+const isEditingDescription = ref(false)
+const descriptionForm = ref('')
+
+const startEditingDescription = () => {
+  descriptionForm.value = tab.value?.special_notes || ''
+  isEditingDescription.value = true
+}
+
+const cancelEditingDescription = () => {
+  isEditingDescription.value = false
+}
+
+const saveDescription = async () => {
+  if (!tab.value) return
+
+  const success = await tabsStore.updateTab(tab.value.id, {
+    special_notes: descriptionForm.value
+  })
+
+  if (success) {
+    isEditingDescription.value = false
+  }
+}
+
+// Expandable Notes Logic
+const expandedNoteId = ref<number | null>(null)
+
+const toggleNote = (itemId: number) => {
+  if (expandedNoteId.value === itemId) {
+    expandedNoteId.value = null
+  } else {
+    expandedNoteId.value = itemId
+  }
+}
+
+const truncateNote = (text: string, length = 20) => {
+  if (!text) return ''
+  if (text.length <= length) return text
+  return text.substring(0, length) + '...'
+}
+
+const handleScroll = () => {
+  if (expandedNoteId.value) {
+    expandedNoteId.value = null
+  }
+}
+
+// Computed Totals
+const calculatedSubtotal = computed(() => {
+  if (!tabItems.value) return 0
+  return tabItems.value.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
+})
+
+const calculatedTax = computed(() => {
+  return calculatedSubtotal.value * 0.15
+})
+
+const calculatedTotalBeforeTip = computed(() => {
+  return calculatedSubtotal.value + calculatedTax.value
+})
+
+const calculatedTotalOwed = computed(() => {
+  return calculatedTotalBeforeTip.value + (Number(tab.value?.tip_amount) || 0)
+})
+
+const handleCheckout = async () => {
+  if (!tab.value) return
+  
+  if (selectedSplitId.value) {
+    // Handle Split Payment
+    // For now, just log or show toast as this logic might need a payment flow
+    console.log('Pay Split:', selectedSplitId.value, currentViewTotals.value)
+    alert('Split payment flow to be implemented. Total: ' + formatCurrency(currentViewTotals.value.totalOwed))
+    return
+  }
+
+  const success = await tabsStore.checkoutTab(tab.value.id, {
+    subtotal: currentViewTotals.value.subtotal,
+    tax_amount: currentViewTotals.value.tax,
+    total_before_tip: currentViewTotals.value.totalBeforeTip,
+    total_owed: currentViewTotals.value.totalOwed
+  })
+
+  if (success) {
+    // Optional: Redirect or show success message
+    // For now, the UI will update to show "Tab is closed"
   }
 }
 
@@ -109,12 +207,79 @@ import AppSplitBillSheet from '@/components/app/tab/AppSplitBillSheet.vue'
 
 const isSplitBillOpen = ref(false)
 
+// Split Logic
+const selectedSplitId = ref<number | null>(null)
+
+const getSplitItems = (splitId: number | null) => {
+  if (!tabItems.value) return []
+  if (!splitId) return tabItems.value
+
+  const split = tabSplits.value?.find(s => s.id === splitId)
+  if (!split) return []
+
+  // Filter items that are in the split's items_included array
+  // items_included is an array of string IDs
+  return tabItems.value.filter(item => split.items_included?.includes(item.id.toString()))
+}
+
+const getUnassignedItems = () => {
+  if (!tabItems.value) return []
+  
+  // Get all item IDs that are assigned to any split
+  const assignedItemIds = new Set<string>()
+  tabSplits.value?.forEach(split => {
+    split.items_included?.forEach(id => assignedItemIds.add(id))
+  })
+
+  // Return items whose IDs are NOT in the assigned set
+  return tabItems.value.filter(item => !assignedItemIds.has(item.id.toString()))
+}
+
+// Computed Totals based on View
+const currentViewTotals = computed(() => {
+  let itemsToSum = []
+  
+  if (selectedSplitId.value) {
+    itemsToSum = getSplitItems(selectedSplitId.value)
+  } else {
+    itemsToSum = tabItems.value || []
+  }
+
+  const subtotal = itemsToSum.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
+  const tax = subtotal * 0.15
+  const totalBeforeTip = subtotal + tax
+  // If viewing a specific split, use its total_owed if available, otherwise calc
+  // But for dynamic view, let's calc fresh
+  const totalOwed = totalBeforeTip + (selectedSplitId.value === null ? (Number(tab.value?.tip_amount) || 0) : 0) // Only add main tip to main view for now
+
+  return {
+    subtotal,
+    tax,
+    totalBeforeTip,
+    totalOwed
+  }
+})
+
 // Watch for tab changes to reload profile
 watch(() => tab.value?.user_id, async (newUserId) => {
   if (newUserId) {
     await loadStaffProfile(newUserId)
   }
 })
+
+// Update quantity helper
+const updateQuantity = async (item: any, change: number) => {
+  const newQuantity = Math.max(1, item.quantity + change)
+  if (newQuantity === item.quantity) return
+
+  await tabsStore.updateDrinkInTab({
+    tabId: Number(props.tabId),
+    itemId: item.id,
+    updates: { quantity: newQuantity }
+  })
+}
+
+import ItemRow from './ItemRow.vue'
 </script>
 
 <template>
@@ -161,73 +326,160 @@ watch(() => tab.value?.user_id, async (newUserId) => {
         </Badge>
       </div>
 
-      <p v-if="tab.special_notes" class="text-sm mt-2 text-muted-foreground">
-        Notes: {{ tab.special_notes }}
-      </p>
+      <div class="mt-4">
+        <div v-if="!isEditingDescription" class="group flex items-start gap-2">
+          <div class="flex-1">
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description / Location</span>
+            <p class="text-sm mt-1">
+              {{ tab.special_notes || 'No description set' }}
+            </p>
+          </div>
+          <Button variant="ghost" size="icon" class="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" @click="startEditingDescription">
+            <iconify-icon icon="lucide:pencil" class="text-xs" />
+          </Button>
+        </div>
+
+        <div v-else class="space-y-2">
+           <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description / Location</span>
+           <div class="flex gap-2">
+             <textarea 
+               v-model="descriptionForm"
+               class="flex-1 min-h-[60px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+               placeholder="e.g., Table 5, Bar Seat"
+             ></textarea>
+             <div class="flex flex-col gap-1">
+               <Button size="icon" class="h-8 w-8" @click="saveDescription">
+                 <iconify-icon icon="lucide:check" class="text-sm" />
+               </Button>
+               <Button variant="ghost" size="icon" class="h-8 w-8" @click="cancelEditingDescription">
+                 <iconify-icon icon="lucide:x" class="text-sm" />
+               </Button>
+             </div>
+           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split Selector -->
+    <div v-if="tabSplits?.length" class="flex items-center gap-1 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        class="h-7 px-2 text-xs font-bold min-w-[3rem]"
+        :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': selectedSplitId === null }"
+        @click="selectedSplitId = null"
+      >
+        ALL
+      </Button>
+      <Button
+        v-for="split in tabSplits"
+        :key="split.id"
+        variant="outline"
+        size="sm"
+        class="h-7 px-2 text-xs font-bold min-w-[2.5rem]"
+        :class="{ 'bg-primary text-primary-foreground hover:bg-primary/90': selectedSplitId === split.id }"
+        @click="selectedSplitId = split.id"
+      >
+        S{{ split.split_number }}
+      </Button>
+      <Button variant="ghost" size="icon" class="h-7 w-7 shrink-0" @click="isSplitBillOpen = true">
+        <iconify-icon icon="lucide:plus" class="text-base" />
+      </Button>
     </div>
 
     <!-- Items Section -->
     <div class="space-y-3">
       <div class="flex justify-between items-center">
-        <h3 class="font-semibold">Items</h3>
+        <h3 class="font-semibold">
+          {{ selectedSplitId ? `Split ${tabSplits?.find(s => s.id === selectedSplitId)?.split_number} Items` : 'All Items' }}
+        </h3>
       </div>
 
-      <div v-if="tabItems?.length" class="space-y-1 max-h-64 overflow-y-auto pr-1">
-        <div
-          v-for="item in [...tabItems].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())"
-          :key="item.id"
-          class="group relative text-sm py-2 px-1 border-b border-dashed border-muted-foreground/20 last:border-0 hover:bg-muted/30 transition-colors"
-        >
-          <!-- View Mode -->
-          <div v-if="editingItemId !== item.id" class="flex justify-between items-start cursor-pointer" @click="startEditing(item)">
-            <div class="flex gap-2 flex-1">
-              <span class="font-bold min-w-[1.5rem]">{{ item.quantity }}x</span>
-              <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                  <span class="font-medium leading-none">{{ item.menu_item?.name || `Item ${item.id}` }}</span>
-                  <span class="text-[10px] text-muted-foreground font-mono whitespace-nowrap">
-                    {{ getRelativeTime(item.created_at) }}
-                  </span>
-                </div>
-                <span v-if="item.special_instructions" class="text-xs text-muted-foreground italic mt-0.5">
-                  -- {{ item.special_instructions }}
-                </span>
+      <div v-if="tabItems?.length" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1" @scroll="handleScroll">
+        <!-- Grouped View (All) -->
+        <template v-if="selectedSplitId === null">
+          <!-- Unassigned Items -->
+          <div v-if="getUnassignedItems().length > 0">
+            <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 sticky top-0 bg-background z-10 py-1">
+              Unassigned / Main Bill
+            </h4>
+            <div class="space-y-1">
+              <div
+                v-for="item in getUnassignedItems()"
+                :key="item.id"
+                class="group relative text-sm py-2 px-1 border-b border-dashed border-muted-foreground/20 last:border-0 hover:bg-muted/30 transition-colors"
+              >
+                <ItemRow 
+                  :item="item" 
+                  :editing-item-id="editingItemId"
+                  :expanded-note-id="expandedNoteId"
+                  :edit-form="editForm"
+                  @start-editing="startEditing"
+                  @cancel-editing="cancelEditing"
+                  @save-edit="saveEdit"
+                  @toggle-note="toggleNote"
+                  @update-quantity="updateQuantity"
+                />
               </div>
-            </div>
-            <div class="text-right font-mono font-medium tabular-nums">
-              {{ formatCurrency(item.item_total) }}
             </div>
           </div>
 
-          <!-- Edit Mode -->
-          <div v-else class="bg-muted/50 -mx-1 px-2 py-2 rounded-md space-y-2">
-            <div class="flex items-center justify-between mb-2">
-              <span class="font-semibold text-xs uppercase tracking-wider text-muted-foreground">Edit Item</span>
-              <div class="flex gap-1">
-                <Button variant="ghost" size="icon" class="h-6 w-6" @click="cancelEditing">
-                  <iconify-icon icon="lucide:x" class="text-xs" />
-                </Button>
-                <Button size="icon" class="h-6 w-6" @click="saveEdit(item)">
-                  <iconify-icon icon="lucide:check" class="text-xs" />
-                </Button>
+          <!-- Split Groups -->
+          <div v-for="split in tabSplits" :key="split.id">
+            <h4 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 sticky top-0 bg-background z-10 py-1 mt-4">
+              Split {{ split.split_number }}
+            </h4>
+            <div class="space-y-1">
+              <div
+                v-for="item in getSplitItems(split.id)"
+                :key="item.id"
+                class="group relative text-sm py-2 px-1 border-b border-dashed border-muted-foreground/20 last:border-0 hover:bg-muted/30 transition-colors"
+              >
+                <ItemRow 
+                  :item="item" 
+                  :editing-item-id="editingItemId"
+                  :expanded-note-id="expandedNoteId"
+                  :edit-form="editForm"
+                  @start-editing="startEditing"
+                  @cancel-editing="cancelEditing"
+                  @save-edit="saveEdit"
+                  @toggle-note="toggleNote"
+                  @update-quantity="updateQuantity"
+                />
               </div>
-            </div>
-            
-            <div class="flex items-center gap-2">
-              <div class="flex items-center border rounded-md bg-background h-8">
-                <button class="px-2 hover:bg-muted h-full border-r" @click="editForm.quantity = Math.max(1, editForm.quantity - 1)">-</button>
-                <span class="w-8 text-center font-bold text-sm">{{ editForm.quantity }}</span>
-                <button class="px-2 hover:bg-muted h-full border-l" @click="editForm.quantity++">+</button>
+              <div v-if="getSplitItems(split.id).length === 0" class="text-xs text-muted-foreground italic py-2">
+                No items in this split
               </div>
-              <input 
-                v-model="editForm.specialInstructions"
-                class="flex-1 h-8 rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder="Add notes..."
-                @keydown.enter="saveEdit(item)"
-              />
             </div>
           </div>
-        </div>
+        </template>
+
+        <!-- Filtered View (Specific Split) -->
+        <template v-else>
+          <div class="space-y-1">
+            <div
+              v-for="item in getSplitItems(selectedSplitId)"
+              :key="item.id"
+              class="group relative text-sm py-2 px-1 border-b border-dashed border-muted-foreground/20 last:border-0 hover:bg-muted/30 transition-colors"
+            >
+              <ItemRow 
+                :item="item" 
+                :editing-item-id="editingItemId"
+                :expanded-note-id="expandedNoteId"
+                :edit-form="editForm"
+                @start-editing="startEditing"
+                @cancel-editing="cancelEditing"
+                @save-edit="saveEdit"
+                @toggle-note="toggleNote"
+                @update-quantity="updateQuantity"
+              />
+            </div>
+             <div v-if="getSplitItems(selectedSplitId).length === 0" class="text-center py-8 text-muted-foreground">
+                <p>No items assigned to this split</p>
+                <Button variant="link" size="sm" @click="isSplitBillOpen = true">Manage Splits</Button>
+              </div>
+          </div>
+        </template>
       </div>
       <div v-else class="flex flex-col items-center justify-center py-8 text-muted-foreground opacity-50">
         <iconify-icon icon="lucide:receipt" class="text-3xl mb-2" />
@@ -239,46 +491,37 @@ watch(() => tab.value?.user_id, async (newUserId) => {
     <div class="border-t pt-4 space-y-2">
       <div class="flex justify-between text-sm">
         <span>Subtotal:</span>
-        <span class="font-medium">{{ formatCurrency(tab.subtotal) }}</span>
+        <span class="font-medium">{{ formatCurrency(currentViewTotals.subtotal) }}</span>
       </div>
       <div class="flex justify-between text-sm">
         <span>Tax (15%):</span>
-        <span class="font-medium">{{ formatCurrency(tab.tax_amount) }}</span>
+        <span class="font-medium">{{ formatCurrency(currentViewTotals.tax) }}</span>
       </div>
       <div class="flex justify-between text-sm">
         <span>Total Before Tip:</span>
-        <span class="font-medium">{{ formatCurrency(tab.total_before_tip) }}</span>
+        <span class="font-medium">{{ formatCurrency(currentViewTotals.totalBeforeTip) }}</span>
       </div>
-      <div v-if="tab.tip_amount ?? 0 > 0" class="flex justify-between text-sm border-t pt-2 mt-2">
+      <div v-if="(tab.tip_amount ?? 0) > 0 && selectedSplitId === null" class="flex justify-between text-sm border-t pt-2 mt-2">
         <span>Tip:</span>
         <span class="font-medium text-green-600">+{{ formatCurrency(tab.tip_amount ?? 0) }}</span>
       </div>
       <div class="flex justify-between font-bold text-lg border-t pt-2 mt-2">
         <span>Total Owed:</span>
-        <span>{{ formatCurrency(tab.total_owed) }}</span>
+        <span>{{ formatCurrency(currentViewTotals.totalOwed) }}</span>
       </div>
-    </div>
 
-    <!-- Splits Section -->
-    <div v-if="tabSplits?.length" class="border-t pt-4 space-y-3">
-      <h3 class="font-semibold">Bill Splits</h3>
-      <div class="space-y-2 max-h-48 overflow-y-auto">
-        <div v-for="split in tabSplits" :key="split.id" class="p-3 bg-muted rounded text-sm">
-          <p class="font-medium">Split {{ split.split_number }}</p>
-          <div class="mt-2 space-y-1 text-xs">
-            <div class="flex justify-between">
-              <span>Amount Due:</span>
-              <span>{{ formatCurrency(split.total_owed) }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Amount Paid:</span>
-              <span>{{ formatCurrency(split.amount_paid) }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>Status:</span>
-              <span class="capitalize">{{ split.status }}</span>
-            </div>
-          </div>
+      <div class="pt-4">
+        <Button 
+          v-if="tab.status === 'open'"
+          class="w-full" 
+          size="lg" 
+          @click="handleCheckout"
+        >
+          <iconify-icon icon="lucide:check-circle" class="mr-2" />
+          {{ selectedSplitId ? `Pay Split ${tabSplits?.find(s => s.id === selectedSplitId)?.split_number}` : 'Checkout & Close Tab' }}
+        </Button>
+        <div v-else class="text-center p-2 bg-muted rounded text-sm font-medium text-muted-foreground">
+          Tab is {{ tab.status }}
         </div>
       </div>
     </div>
