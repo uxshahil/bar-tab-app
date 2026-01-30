@@ -14,6 +14,7 @@ declare module 'vue' {
     AdminAuthLayout: typeof import('./src/components/layout/main/AdminAuthLayout.vue')['default']
     AppActiveTabs: typeof import('./src/components/app/tab/AppActiveTabs.vue')['default']
     AppAddToTab: typeof import('./src/components/app/tab/AppAddToTab.vue')['default']
+    AppDrinkIcon: typeof import('./src/components/app/drinks/AppDrinkIcon.vue')['default']
     AppErrorDevSection: typeof import('./src/components/app/error/AppErrorDevSection.vue')['default']
     AppErrorPage: typeof import('./src/components/app/error/AppErrorPage.vue')['default']
     AppErrorProdSection: typeof import('./src/components/app/error/AppErrorProdSection.vue')['default']

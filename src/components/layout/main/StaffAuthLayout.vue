@@ -58,5 +58,3 @@ provide(menuKey, {
     </div>
   </div>
 </template>
-  </div>
-</template>

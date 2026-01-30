@@ -35,7 +35,7 @@ const handleCreateDrink = async (formData: Partial<CreateNewDrink>) => {
   try {
     console.log('Creating drink:', drink)
 
-    const drinkId = drinkRequest.createDrink(drink)
+    const drinkId = drinkApi.createDrink(drink)
     if (drinkId) {
       console.log('Drink created with ID:', await drinkId)
     }

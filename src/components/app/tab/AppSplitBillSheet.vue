@@ -13,6 +13,29 @@ const props = defineProps<{
 
 const isOpen = defineModel<boolean>('open')
 
+const createNewSplit = async () => {
+    loading.value = true
+    const maxSplitNumber = tabSplits.value?.reduce((max, s) => Math.max(max, s.split_number || 0), 0) || 0
+    const nextSplitNumber = maxSplitNumber + 1
+    
+    await tabsStore.createTabSplit({
+        tab_id: Number(props.tabId),
+        split_number: nextSplitNumber,
+        items_included: [],
+        subtotal: 0,
+        tax_on_split: 0,
+        total_owed: 0,
+        amount_paid: 0,
+        status: 'pending',
+        tip_amount: 0,
+        settled_at: null
+    })
+    
+    // Refresh splits
+    await tabsStore.getTabSplits(props.tabId.toString())
+    loading.value = false
+}
+
 const tabsStore = useTabsStore()
 const { tabItems, tabSplits } = storeToRefs(tabsStore)
 

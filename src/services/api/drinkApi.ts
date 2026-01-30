@@ -46,4 +46,23 @@ const deleteDrink = async (drink: DeleteDrink) => {
   }
 }
 
-export default { createDrink, editDrink, deleteDrink }
+
+const fetchDrinkById = async (id: string | number) => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/drinks/${id}`, {
+      headers: {
+        apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+    })
+    return {
+        data: response.data,
+        isRevalidating: response.headers['x-cache-revalidating'] === 'true'
+    }
+  } catch (error) {
+    console.error('Error fetching drink:', error)
+    throw error
+  }
+}
+
+export default { createDrink, editDrink, deleteDrink, fetchDrinkById }

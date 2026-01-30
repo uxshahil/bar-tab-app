@@ -4,6 +4,7 @@ import {
   updateDrinkQuery,
   deleteDrinkQuery
 } from '@/services/supabase/queries/drinkQueries'
+import drinkApi from '@/services/api/drinkApi'
 import { useMemoize } from '@vueuse/core'
 import type { Drink, Drinks } from '@/services/supabase/types/drinkTypes'
 
@@ -50,12 +51,51 @@ export const useDrinksStore = defineStore('drinks-store', () => {
   const getDrink = async (id: string) => {
     drink.value = null
 
-    const { data, error, status } = await loadDrink(id)
+    try {
+      // Use the SWR API endpoint instead of direct DB query
+      let { data, isRevalidating } = await drinkApi.fetchDrinkById(id)
+      
+      if (data) {
+        drink.value = data
+      }
 
-    if (error) useErrorStore().setError({ error, customCode: status })
-    if (data) drink.value = data
+      // Poll if revalidation is occurring - Run in background (do not await)
+      if (isRevalidating) {
+        pollForUpdates(id)
+      }
+    } catch (error: any) {
+      useErrorStore().setError({ 
+        error: error.message || 'Failed to fetch drink', 
+        customCode: error.response?.status || 500 
+      })
+    }
+  }
 
-    validateCache({ ref: drink, query: drinkQuery, key: id, loaderFn: loadDrink })
+  const pollForUpdates = async (id: string) => {
+    const maxAttempts = 5
+    let attempts = 0
+    let isRevalidating = true
+    console.log('[Store] Revalidation signal received. Polling for updates...')
+
+    while (isRevalidating && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 3000)) // Wait 3s
+        attempts++
+
+        try {
+            const result = await drinkApi.fetchDrinkById(id)
+            const data = result.data
+            isRevalidating = result.isRevalidating
+            
+            if (data && JSON.stringify(data) !== JSON.stringify(drink.value)) {
+                 console.log('[Store] Fresh data received via polling')
+                 drink.value = data
+            }
+        } catch (e) {
+            console.error('[Store] Polling error', e)
+            isRevalidating = false
+        }
+    }
+    console.log('[Store] Polling finished.')
   }
 
   const updateDrink = async (id: number, updates: Partial<Drink>) => {

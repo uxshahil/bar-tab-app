@@ -23,7 +23,7 @@ const createUser = async (formData: CreateNewUser) => {
     bio: formData.bio || '', // Default empty string if not provided
   }
 
-  const userId = (await profileRequests.createProfile(user)) ?? null
+  const userId = (await profileApi.createProfile(user)) ?? null
 
   if (userId === null) {
     console.log('error')

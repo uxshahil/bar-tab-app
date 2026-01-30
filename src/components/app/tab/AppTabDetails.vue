@@ -96,35 +96,11 @@ const toggleNote = (itemId: number) => {
   }
 }
 
-const truncateNote = (text: string, length = 20) => {
-  if (!text) return ''
-  if (text.length <= length) return text
-  return text.substring(0, length) + '...'
-}
-
 const handleScroll = () => {
   if (expandedNoteId.value) {
     expandedNoteId.value = null
   }
 }
-
-// Computed Totals
-const calculatedTotalBeforeTip = computed(() => {
-  if (!tabItems.value) return 0
-  return tabItems.value.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
-})
-
-const calculatedSubtotal = computed(() => {
-  return calculatedTotalBeforeTip.value / 1.15
-})
-
-const calculatedTax = computed(() => {
-  return calculatedTotalBeforeTip.value - calculatedSubtotal.value
-})
-
-const calculatedTotalOwed = computed(() => {
-  return calculatedTotalBeforeTip.value + (Number(tab.value?.tip_amount) || 0)
-})
 
 const totalPaid = computed(() => {
   return tabPayments.value?.reduce((sum, p) => sum + (Number(p.amount_paid) || 0), 0) || 0
@@ -179,24 +155,6 @@ import { formatCurrency } from '@/utils/currency'
 
 import { useNow } from '@vueuse/core'
 const now = useNow()
-
-const getRelativeTime = (dateString: string) => {
-  const date = new Date(dateString)
-  const diffInSeconds = Math.floor((now.value.getTime() - date.getTime()) / 1000)
-  
-  if (diffInSeconds < 60) return 'Just now'
-  
-  const diffInMinutes = Math.floor(diffInSeconds / 60)
-  if (diffInMinutes < 60) return `${diffInMinutes} min ago`
-  
-  const diffInHours = Math.floor(diffInMinutes / 60)
-  if (diffInHours < 24) {
-    if (diffInHours === 0) return 'Less than an hour ago' // Should be covered by minutes, but safe fallback
-    return `${diffInHours} h ago`
-  }
-  
-  return date.toLocaleDateString()
-}
 
 const loadStaffProfile = async (userId: string) => {
   const { data } = await profileQuery({ column: 'id', value: userId })
