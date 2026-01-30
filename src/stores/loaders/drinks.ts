@@ -7,6 +7,7 @@ import {
 import drinkApi from '@/services/api/drinkApi'
 import { useMemoize } from '@vueuse/core'
 import type { Drink, Drinks } from '@/services/supabase/types/drinkTypes'
+import { socket } from '@/services/socket/socket'
 
 export const useDrinksStore = defineStore('drinks-store', () => {
   const drinks = ref<Drinks | null>(null)
@@ -49,7 +50,7 @@ export const useDrinksStore = defineStore('drinks-store', () => {
   }
 
   const getDrink = async (id: string) => {
-    drink.value = null
+    // drink.value = null // Don't clear, just overwrite when data comes to avoid UI flicker
 
     try {
       // Use the SWR API endpoint instead of direct DB query
@@ -75,7 +76,6 @@ export const useDrinksStore = defineStore('drinks-store', () => {
     const maxAttempts = 5
     let attempts = 0
     let isRevalidating = true
-    console.log('[Store] Revalidation signal received. Polling for updates...')
 
     while (isRevalidating && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 3000)) // Wait 3s
@@ -87,15 +87,21 @@ export const useDrinksStore = defineStore('drinks-store', () => {
             isRevalidating = result.isRevalidating
             
             if (data && JSON.stringify(data) !== JSON.stringify(drink.value)) {
-                 console.log('[Store] Fresh data received via polling')
                  drink.value = data
+                 
+                 // Update list cache if exists
+                 if (drinks.value) {
+                    const idx = drinks.value.findIndex(d => d.id === data.id)
+                    if (idx !== -1) {
+                        drinks.value[idx] = data
+                    }
+                 }
             }
         } catch (e) {
             console.error('[Store] Polling error', e)
             isRevalidating = false
         }
     }
-    console.log('[Store] Polling finished.')
   }
 
   const updateDrink = async (id: number, updates: Partial<Drink>) => {
@@ -127,13 +133,41 @@ export const useDrinksStore = defineStore('drinks-store', () => {
     getDrinks()
   }
 
+  // Real-time updates
+  const initSocket = () => {
+    
+    socket.on('drink:created', () => {
+        getDrinks() // Refresh list
+    })
+
+    socket.on('drink:updated', async (payload) => {
+        // Always refresh list
+        getDrinks()
+
+        // If currently viewing THIS drink, refresh detail
+        // Convert both to strings to ensure match
+        if (drink.value && String(drink.value.id) === String(payload.id)) {
+            await getDrink(String(payload.id))
+        }
+    })
+
+    socket.on('drink:deleted', (payload) => {
+        getDrinks()
+        if (drink.value && String(drink.value.id) === String(payload.id)) {
+            drink.value = null // Clear changed data
+        }
+    })
+  }
+
   return {
     drinks,
     drink,
     getDrinks,
     getDrink,
     updateDrink,
-    deleteDrink
+    deleteDrink,
+    pollForUpdates,
+    initSocket
   }
 })
 

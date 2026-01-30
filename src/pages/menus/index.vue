@@ -2,8 +2,9 @@
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsMenus'
 import { menusWithCategoriesQuery } from '@/services/supabase/queries/menuQueries'
 import type { MenusWithCategories } from '@/services/supabase/types/menuTypes'
+import AppResourcePage from '@/components/common/AppResourcePage.vue'
 
-usePageStore().pageData.title = 'Menus'
+
 
 const menus = ref<MenusWithCategories | null>(null)
 const getMenus = async () => {
@@ -18,12 +19,11 @@ await getMenus()
 </script>
 
 <template>
-  <DataTable
-    v-if="menus"
+  <AppResourcePage
+    title="Menus"
     :data="menus"
     :columns="columns"
     :loading="!menus"
-    class="w-full"
-    :empty-text="'No menus found'"
+    :options="{}"
   />
 </template>

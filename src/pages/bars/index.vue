@@ -2,8 +2,9 @@
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsBars'
 import { barsQuery } from '@/services/supabase/queries/barQueries'
 import type { Bars } from '@/services/supabase/types/barTypes'
+import AppResourcePage from '@/components/common/AppResourcePage.vue'
 
-usePageStore().pageData.title = 'Bars'
+
 
 const bars = ref<Bars | null>(null)
 const getBars = async () => {
@@ -18,12 +19,11 @@ await getBars()
 </script>
 
 <template>
-  <DataTable
-    v-if="bars"
+  <AppResourcePage
+    title="Bars"
     :data="bars"
     :columns="columns"
     :loading="!bars"
-    class="w-full"
-    :empty-text="'No bars found'"
+    :options="{}"
   />
 </template>

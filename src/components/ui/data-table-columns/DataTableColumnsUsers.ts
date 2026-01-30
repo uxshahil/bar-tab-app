@@ -1,13 +1,11 @@
 import { RouterLink } from 'vue-router'
 import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
-import profileApi from '@/services/api/profileApi.ts'
-// import useUsersStore from '@/stores/loaders/users'
-import type { Profiles } from '@/services/supabase/types/profileTypes'
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { DeleteUser, EditUser } from '@/interfaces/UserInterfaces'
-// import { use } from '@formkit/core'
+import type { DeleteUser } from '@/interfaces/UserInterfaces'
+import type { Profiles } from '@/services/supabase/types/profileTypes'
+import profileApi from '@/services/api/profileApi'
 
-const { deleteProfile, editProfile } = profileApi
+const { deleteProfile } = profileApi
 // const profileStore = useUsersStore();
 
 
@@ -54,7 +52,11 @@ export const columns: ColumnDef<Profiles[0]>[] = [
           object: {
             id: user.id,
             name: user.username,
-            editFn: () => editProfile({id: user.id, data:{}} as EditUser),
+            editFn: () => {
+                 // @ts-ignore
+                 // eslint-disable-next-line
+                 table.options.meta?.onEditUser?.(user)
+            },
             deleteFn: () => deleteProfile({"id": user?.id} as DeleteUser),
           },
         }),

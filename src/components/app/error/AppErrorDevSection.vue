@@ -13,7 +13,7 @@ defineProps<{
   <div>
     <iconify-icon icon="lucide:triangle-alert" class="text-7xl text-destructive" />
     <h1 class="font-extrabold text-7xl text-secondary">{{ customCode || code }}</h1>
-    <p class="font-extrabold text-7xl text-secondary" v-if="!customCode && !code && statusCode">)">
+    <p class="font-extrabold text-7xl text-secondary" v-if="!customCode && !code && statusCode">
       {{ statusCode }}
     </p>
     <p class="text-3xl font-extrabold text-primary my-2">{{ message }}</p>

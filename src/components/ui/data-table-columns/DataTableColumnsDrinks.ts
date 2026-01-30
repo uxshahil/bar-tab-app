@@ -3,11 +3,10 @@ import type { Drinks } from '@/services/supabase/types/drinkTypes'
 import { RouterLink } from 'vue-router'
 import { h } from 'vue'
 import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
+import EditablePriceCell from '@/components/ui/data-table-cells/EditablePriceCell.vue'
 import { Button } from '@/components/ui/button'
 
 const { updateDrink, deleteDrink } = useDrinksStore();
-
-import { formatCurrency } from '@/utils/currency'
 
 export const columns: ColumnDef<Drinks[0]>[] = [
   {
@@ -38,11 +37,13 @@ export const columns: ColumnDef<Drinks[0]>[] = [
   },
   {
     accessorKey: 'price',
-    header: () => h('div', { class: 'text-left' }, 'Price'),
+    header: () => h('div', { class: 'text-right' }, 'Price'),
     cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('price'))
-      const formatted = formatCurrency(amount)
-      return h('div', { class: 'text-right font-medium' }, formatted)
+      return h(EditablePriceCell, {
+        value: Number(row.getValue('price')),
+        id: row.original.id,
+        onUpdate: (id: number, val: number) => updateDrink(id, { price: val })
+      })
     },
   },
     {
@@ -65,7 +66,17 @@ export const columns: ColumnDef<Drinks[0]>[] = [
             h('iconify-icon', { icon: 'lucide:plus', class: 'mr-2 h-4 w-4' }),
             'Add'
           ]),
-          h(DropdownAction, { object: { id: drink.id, name: drink.name, editFn: updateDrink, deleteFn: deleteDrink } })
+          h(DropdownAction, { 
+            object: { 
+              id: drink.id, 
+              name: drink.name, 
+              editFn: () => {
+                 // @ts-ignore
+                 table.options.meta?.onEditDrink?.(drink)
+              }, 
+              deleteFn: deleteDrink 
+            } 
+          })
         ])
       }
     },

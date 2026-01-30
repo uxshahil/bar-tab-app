@@ -2,13 +2,13 @@ import { supabase } from '@/providers/supabaseClient'
 
 export const drinksQuery = supabase
   .from('menu_item')
-  .select('id, name, slug, price, category (name, slug, menu (name, slug))')
+  .select('*, category (name, slug, menu (name, slug))')
 
 // Helper to build a drinks query with optional search filtering
 export const fetchDrinks = (search?: string | '*') => {
   let q = supabase
     .from('menu_item')
-    .select('id, name, slug, price, category (name, slug, menu (name, slug))')
+    .select('*, category (name, slug, menu (name, slug))')
 
   if (search && String(search).trim().length) {
     const term = `%${String(search).trim()}%`

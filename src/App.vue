@@ -3,6 +3,7 @@ const { activeError } = storeToRefs(useErrorStore())
 const errorStore = useErrorStore()
 import { useAddToTabStore } from '@/stores/ui/addToTab'
 import AppAddToTab from '@/components/app/tab/AppAddToTab.vue'
+import { useDrinksStore } from '@/stores/loaders/drinks'
 
 const addToTabStore = useAddToTabStore()
 
@@ -13,6 +14,7 @@ onErrorCaptured((error) => {
 
 onMounted(() => {
   useAuthStore().trackAuthChanges()
+  useDrinksStore().initSocket()
 })
 
 const { user, profile } = storeToRefs(useAuthStore())

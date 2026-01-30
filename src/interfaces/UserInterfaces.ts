@@ -6,7 +6,7 @@ export interface CreateNewUser {
   email: string // Must be valid email format
   password: string // Should meet password requirements
   pin: string // Numeric PIN code
-  user_role: 'bar-staff' | 'bar-manager' // Restricted to these roles only
+  user_role: 'bar-staff' | 'bar-manager' | 'admin' // Restricted to these roles only
   full_name: string // Combination of first and last name
   bio: string // Optional user biography
   avatar_url: string // URL to user's avatar image
