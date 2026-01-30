@@ -1,34 +1,26 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsUsers'
-import { profilesQuery } from '@/services/supabase/queries/profileQueries'
-import type { Profiles as Users } from '@/services/supabase/types/profileTypes'
+import { useUsersStore } from '@/stores/loaders/users'
+import { storeToRefs } from 'pinia'
 import AppUserSheet from '@/components/app/users/AppUserSheet.vue'
-import type { Profile } from '@/services/supabase/types/profileTypes'
 import AppResourcePage from '@/components/common/AppResourcePage.vue'
 
+const usersStore = useUsersStore()
+const { users } = storeToRefs(usersStore)
 
-
-const users = ref<Users | null>(null)
-const getUsers = async () => {
-  const { data, error, status } = await profilesQuery()
-
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  users.value = data
-}
-
-await getUsers()
+// Initial fetch
+usersStore.getUsers()
 
 const isUserSheetOpen = ref(false)
-const editingUser = ref<Profile | null>(null)
+const editingUser = ref<any>(null)
 
-const onEditUser = (user: Profile) => {
+const onEditUser = (user: any) => {
   editingUser.value = user
   isUserSheetOpen.value = true
 }
 
 const onRefresh = async () => {
-  await getUsers()
+  await usersStore.getUsers()
 }
 </script>
 

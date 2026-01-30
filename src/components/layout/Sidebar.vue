@@ -104,7 +104,7 @@ watchEffect(() => {
         <iconify-icon icon="lucide:menu"></iconify-icon>
       </Button>
 
-      <DropdownMenu>
+      <DropdownMenu v-if="['admin', 'bar-manager'].includes(profile?.user_role || '')">
         <DropdownMenuTrigger>
           <Button variant="outline" size="icon" class="w-8 h-8">
             <iconify-icon icon="lucide:plus"></iconify-icon>

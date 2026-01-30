@@ -41,7 +41,7 @@ export const columns: ColumnDef<MenusWithCategories[0]>[] = [
             RouterLink,
             {
               to: `/menus/${row.original.slug}/${slug.toLowerCase().replace(/\s+/g, '-')}`,
-              class: `text-left font-medium hover:text-red-500 hover:font-black`
+              class: `text-left`
             },
             () => category.name
           )

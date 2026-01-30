@@ -26,7 +26,7 @@ const createProfile = async (profileData: {
 
 const editProfile = async (profileData: EditUser) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/update-user`, profileData, {
+    const response = await axios.put(`${import.meta.env.VITE_API_URL}/update-user/${profileData.id}`, profileData.data, {
       headers: {
         apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,

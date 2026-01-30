@@ -37,12 +37,12 @@ const onTabSelected = (tab: any) => {
   <nav class="h-16 border-b bg-muted/40 flex gap-2 justify-between px-6 items-center">
     
     <div class="gap-x-2 flex flex col w-full">
-    <AppActiveTabs @tab-selected="onTabSelected" />
+    <AppActiveTabs v-if="profile?.user_role !== 'admin'" @tab-selected="onTabSelected" />
     <GlobalSearch />
     </div>
     
     <div class="flex justify-center items-center gap-1">
-      <Button @click="toggleRightSidebar" variant="outline" size="icon" class="w-8 h-8 mr-2">
+      <Button v-if="profile?.user_role !== 'admin'" @click="toggleRightSidebar" variant="outline" size="icon" class="w-8 h-8 mr-2">
         <Transition name="scale" mode="out-in">
           <iconify-icon v-if="rightSidebarOpen" icon="lucide:panel-right-close" />
           <iconify-icon v-else icon="lucide:panel-right-open" />

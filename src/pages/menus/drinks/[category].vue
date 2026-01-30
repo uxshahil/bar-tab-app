@@ -1,57 +1,57 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrinks'
 import { useDrinksStore } from '@/stores/loaders/drinks'
-import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import type { Drink } from '@/services/supabase/types/drinkTypes'
+import { storeToRefs } from 'pinia'
 import AppDrinkSheet from '@/components/app/drinks/AppDrinkSheet.vue'
 import AppResourcePage from '@/components/common/AppResourcePage.vue'
-
-const route = useRoute()
-
-// Add to Tab Logic (Global Store)
 import { useAddToTabStore } from '@/stores/ui/addToTab'
 import { useAuthStore } from '@/stores/auth'
 
+const route = useRoute()
+const drinksStore = useDrinksStore()
 const addToTabStore = useAddToTabStore()
 const authStore = useAuthStore()
-const drinksStore = useDrinksStore()
-const { drinks } = storeToRefs(drinksStore)
+const { categoryDrinks } = storeToRefs(drinksStore)
+
+const categorySlug = computed(() => route.params.category as string)
+const categoryTitle = computed(() => {
+  const slug = categorySlug.value
+  return slug.charAt(0).toUpperCase() + slug.slice(1) + ' Drinks'
+})
 
 const isDrinkSheetOpen = ref(false)
 const editingDrinkId = ref<number | null>(null)
 
-const onEditDrink = (drink: Drink) => {
+const onEditDrink = (drink: any) => {
   editingDrinkId.value = drink.id
   isDrinkSheetOpen.value = true
 }
 
-const getDrinks = async (search?: string) => {
-  await drinksStore.getDrinks(search)
-}
-
-const onAddToTab = (drink: Drink) => {
+const onAddToTab = (drink: any) => {
   addToTabStore.open(drink)
 }
 
-// Load initially using current query param
-await getDrinks(route.query.search as string | undefined)
+// Fetch data
+await drinksStore.getDrinksByCategory(categorySlug.value)
 
-// React to search query changes (e.g. from navbar)
+// Watch for route changes to refetch if category changes
 watch(
-  () => route.query.search,
-  (newSearch) => {
-    getDrinks(newSearch as string | undefined)
-  },
+  () => route.params.category,
+  async (newCategory) => {
+    if (newCategory) {
+      await drinksStore.getDrinksByCategory(newCategory as string)
+    }
+  }
 )
 </script>
 
 <template>
   <AppResourcePage
-    title="Drinks"
-    :data="drinks"
+    :title="categoryTitle"
+    :data="categoryDrinks"
     :columns="columns"
-    :loading="!drinks"
+    :loading="!categoryDrinks"
     :options="{
       meta: {
         onAddToTab,

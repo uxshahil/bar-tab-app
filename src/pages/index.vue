@@ -1,24 +1,23 @@
-<script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrinks'
-import { fetchDrinks } from '@/services/supabase/queries/drinkQueries'
+import { useDrinksStore } from '@/stores/loaders/drinks'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import type { Drinks, Drink } from '@/services/supabase/types/drinkTypes'
+import type { Drink } from '@/services/supabase/types/drinkTypes'
 import AppAddToTab from '@/components/app/tab/AppAddToTab.vue'
+import { useAuthStore } from '@/stores/auth'
 
 usePageStore().pageData.title = 'Dashboard'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const drinksStore = useDrinksStore()
+const { drinks } = storeToRefs(drinksStore)
 
-const drinks = ref<Drinks | null>(null)
 const selectedDrink = ref<Drink | null>(null)
 const isAddToTabOpen = ref(false)
 
 const getDrinks = async (search?: string) => {
-  const { data, error, status } = await fetchDrinks(search)
-
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  drinks.value = data
+  await drinksStore.getDrinks(search)
 }
 
 const onAddToTab = async (drink: Drink) => {
@@ -52,7 +51,8 @@ watch(
           :empty-text="'No drinks found'"
           :options="{
             meta: {
-              onAddToTab
+              onAddToTab,
+              userRole: authStore.profile?.user_role
             }
           }"
         />

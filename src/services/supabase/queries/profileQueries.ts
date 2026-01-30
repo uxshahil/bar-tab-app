@@ -9,7 +9,7 @@ export const profileQuery = ({ column, value }: { column: string; value: string 
 
 export const profilesQuery = () => supabase
   .from('profile')
-  .select(`id, username, full_name, user_role`)
+  .select('*')
 
 
 export const updateUserQuery = (updatedUser = {} as Partial<Profile>, id: string) => supabase

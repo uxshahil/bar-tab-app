@@ -93,6 +93,13 @@ declare module 'vue-router/auto-routes' {
       { slug: ParamValue<false> },
       | never
     >,
+    '/menus/drinks/[category]': RouteRecordInfo<
+      '/menus/drinks/[category]',
+      '/menus/drinks/:category',
+      { category: ParamValue<true> },
+      { category: ParamValue<false> },
+      | never
+    >,
     '/pos-login': RouteRecordInfo<
       '/pos-login',
       '/pos-login',
@@ -191,6 +198,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/menus/[slug].vue': {
       routes:
         | '/menus/[slug]'
+      views:
+        | never
+    }
+    'src/pages/menus/drinks/[category].vue': {
+      routes:
+        | '/menus/drinks/[category]'
       views:
         | never
     }

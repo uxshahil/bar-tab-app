@@ -9,6 +9,12 @@ const route = useRoute()
 const searchQuery = ref((route.query.search as string) || '')
 
 const updateSearch = useDebounceFn((query: string) => {
+  // If we are on a drink detail page (or any sub-page of drinks), redirect to the main list
+  if (route.path.startsWith('/drinks/') && route.path !== '/drinks') {
+    router.push({ path: '/drinks', query: { search: query } })
+    return
+  }
+  
   const queryObj = { ...route.query }
   
   if (query) {

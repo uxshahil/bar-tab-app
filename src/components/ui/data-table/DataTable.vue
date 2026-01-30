@@ -19,11 +19,15 @@ const props = defineProps<{
 }>()
 
 const table = useVueTable({
+  ...props.options,
   get data() {
     return props.data
   },
   get columns() {
     return props.columns
+  },
+  get meta() {
+    return props.options?.meta
   },
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
@@ -32,7 +36,6 @@ const table = useVueTable({
       pageSize: 10,
     },
   },
-  ...props.options
 })
 </script>
 

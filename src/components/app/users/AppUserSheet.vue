@@ -69,9 +69,12 @@ const handleSubmit = async (fields: any) => {
         // Only include password if provided
         if (!userData.password) delete userData.password
         
+        // Sanitize data for profile table (remove non-columns)
+        const { firstName, lastName, ...cleanData } = userData
+        
         const editPayload: EditUser = {
             id: props.userToEdit.id,
-            data: userData
+            data: cleanData
         }
         await profileApi.editProfile(editPayload)
         emit('refresh')

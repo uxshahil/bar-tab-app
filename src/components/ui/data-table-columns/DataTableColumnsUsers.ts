@@ -40,7 +40,7 @@ export const columns: ColumnDef<Profiles[0]>[] = [
     id: 'actions',
     header: () => h('div', { class: 'text-left' }, 'Actions'),
     enableHiding: false,
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const user = row.original
 
       console.log(JSON.stringify(user))

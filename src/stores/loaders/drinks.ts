@@ -1,8 +1,10 @@
 import {
   drinksQuery,
   drinkQuery,
+  drinksByCategoryQuery,
   updateDrinkQuery,
-  deleteDrinkQuery
+  deleteDrinkQuery,
+  fetchDrinks as fetchDrinksQuery // Rename to avoid conflict if needed, or just use fetchDrinks
 } from '@/services/supabase/queries/drinkQueries'
 import drinkApi from '@/services/api/drinkApi'
 import { useMemoize } from '@vueuse/core'
@@ -11,14 +13,18 @@ import { socket } from '@/services/socket/socket'
 
 export const useDrinksStore = defineStore('drinks-store', () => {
   const drinks = ref<Drinks | null>(null)
+  const categoryDrinks = ref<Drinks | null>(null)
   const drink = ref<Drink | null>(null)
+  const currentSearch = ref('')
+  
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const loadDrinks = useMemoize(async (_key: string) => await drinksQuery)
+  const loadDrinks = useMemoize(async (search: string = '') => await fetchDrinksQuery(search))
+  const loadDrinksByCategory = useMemoize(async (categorySlug: string) => await drinksByCategoryQuery(categorySlug))
   const loadDrink = useMemoize(async (key: string) => await drinkQuery(key))
 
   interface ValidateCacheParams {
     ref: typeof drinks | typeof drink
-    query: typeof drinksQuery | typeof drinkQuery
+    query: any // Relaxed type for now or typeof fetchDrinksQuery
     key: string
     loaderFn: typeof loadDrinks | typeof loadDrink
   }
@@ -27,7 +33,7 @@ export const useDrinksStore = defineStore('drinks-store', () => {
     if (ref.value) {
       const finalQuery = typeof query === 'function' ? query(key as string) : query
 
-      finalQuery.then(({ data, error }) => {
+      finalQuery.then(({ data, error }: { data: any, error: any }) => {
         if (JSON.stringify(ref.value) === JSON.stringify(data)) {
           return
         } else {
@@ -38,15 +44,32 @@ export const useDrinksStore = defineStore('drinks-store', () => {
     }
   }
 
-  const getDrinks = async () => {
-    drinks.value = null
+  const getDrinks = async (search: string = '') => {
+    // drinks.value = null // Removed to prevent UI flashing during updates
+    currentSearch.value = search
 
-    const { data, error, status } = await loadDrinks('drinks')
+    const { data, error, status } = await loadDrinks(search)
 
     if (error) useErrorStore().setError({ error, customCode: status })
     if (data) drinks.value = data
 
-    validateCache({ ref: drinks, query: drinksQuery, key: 'drinks', loaderFn: loadDrinks })
+    validateCache({ ref: drinks, query: (s: string) => fetchDrinksQuery(s), key: search, loaderFn: loadDrinks })
+  }
+
+  const getDrinksByCategory = async (categorySlug: string) => {
+    // categoryDrinks.value = null // Removed to prevent UI flashing
+
+    const { data, error, status } = await loadDrinksByCategory(categorySlug)
+
+    if (error) useErrorStore().setError({ error, customCode: status })
+    if (data) categoryDrinks.value = data
+
+    validateCache({ 
+      ref: categoryDrinks, 
+      query: (key) => drinksByCategoryQuery(key), 
+      key: categorySlug, 
+      loaderFn: loadDrinksByCategory 
+    })
   }
 
   const getDrink = async (id: string) => {
@@ -112,14 +135,22 @@ export const useDrinksStore = defineStore('drinks-store', () => {
       return false
     }
 
-    // Refresh list if needed or update local state
-    // For now, simpler invalidation is safer
+    // 1. Optimistic Update (Immediate Feedback)
+    if (drinks.value) {
+        const index = drinks.value.findIndex(d => d.id === id)
+        if (index !== -1) {
+            drinks.value[index] = { ...drinks.value[index], ...updates }
+        }
+    }
+
+    // 2. Refresh detail view if open
     if (drink.value?.id === id) {
       await getDrink(id.toString())
     }
     
-    // Also refresh the main list
-    await getDrinks()
+    // 3. Invalidate Cache & Refresh using CURRENT SEARCH
+    loadDrinks.delete(currentSearch.value) // Force fresh fetch for current view
+    await getDrinks(currentSearch.value)
 
     return true
   }
@@ -130,7 +161,8 @@ export const useDrinksStore = defineStore('drinks-store', () => {
     const { error, status } = await deleteDrinkQuery(drink.value.id)
     if (error) useErrorStore().setError({ error, customCode: status })
 
-    getDrinks()
+    loadDrinks.delete(currentSearch.value)
+    getDrinks(currentSearch.value)
   }
 
   // Real-time updates
@@ -161,8 +193,10 @@ export const useDrinksStore = defineStore('drinks-store', () => {
 
   return {
     drinks,
+    categoryDrinks,
     drink,
     getDrinks,
+    getDrinksByCategory,
     getDrink,
     updateDrink,
     deleteDrink,

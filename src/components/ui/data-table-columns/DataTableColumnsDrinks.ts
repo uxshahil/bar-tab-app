@@ -54,7 +54,8 @@ export const columns: ColumnDef<Drinks[0]>[] = [
         const drink = row.original
   
         return h('div', { class: 'flex items-center gap-2' }, [
-          h(Button, { 
+          // @ts-ignore
+          ['bar-staff', 'bar-manager'].includes(table.options.meta?.userRole) ? h(Button, { 
             variant: 'outline', 
             size: 'sm',
             class: 'h-8 px-2 lg:px-3',
@@ -65,7 +66,7 @@ export const columns: ColumnDef<Drinks[0]>[] = [
           }, () => [
             h('iconify-icon', { icon: 'lucide:plus', class: 'mr-2 h-4 w-4' }),
             'Add'
-          ]),
+          ]) : null,
           h(DropdownAction, { 
             object: { 
               id: drink.id, 

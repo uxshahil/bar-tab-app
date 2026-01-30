@@ -8,9 +8,11 @@ import { onMounted, computed, watch, ref } from 'vue'
 import { useAddToTabStore } from '@/stores/ui/addToTab'
 import { Button } from '@/components/ui/button'
 import AppDrinkIcon from '@/components/app/drinks/AppDrinkIcon.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const drinksStore = useDrinksStore()
+const authStore = useAuthStore()
 const { drink } = storeToRefs(drinksStore)
 
 const slug = computed(() => (route.params as { slug?: string }).slug || '')
@@ -170,6 +172,7 @@ const handleAddToTab = () => {
               <span>R {{ drink.price }}</span>
             </div>
             <Button
+              v-if="authStore.profile?.user_role !== 'admin'"
               size="sm"
               class="cursor-pointer rounded-full px-8 py-6 text-sm font-serif bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
               @click="handleAddToTab"

@@ -40,7 +40,7 @@ provide(menuKey, {
     <AppDrinkSheet v-model:open="taskSheetOpen.drink" />
 
     <!-- Global Tab Sheet -->
-    <TabSheet />
+
 
     <div
       class="flex flex-col transition-[margin]"
@@ -55,8 +55,6 @@ provide(menuKey, {
           </div>
           <slot />
         </main>
-        
-        <AppRightSidebar />
       </div>
     </div>
   </div>
