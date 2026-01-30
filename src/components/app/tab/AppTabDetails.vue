@@ -276,8 +276,9 @@ const currentViewTotals = computed(() => {
   }
 
   const totalBeforeTip = itemsToSum.reduce((sum, item) => sum + (Number(item.item_total) || 0), 0)
-  const subtotal = totalBeforeTip / 1.15
-  const tax = totalBeforeTip - subtotal
+  const vat = Number(import.meta.env.VITE_VAT) || 0.15
+  const tax = totalBeforeTip * vat
+  const subtotal = totalBeforeTip - tax
   // If viewing a specific split, use its total_owed if available, otherwise calc
   // But for dynamic view, let's calc fresh
   const totalOwed = totalBeforeTip + (selectedSplitId.value === null ? (Number(tab.value?.tip_amount) || 0) : 0) // Only add main tip to main view for now
@@ -337,19 +338,18 @@ const receiptItems = computed(() => {
 const receiptTab = computed(() => {
   if (!tab.value) return null
   
-  if (selectedSplitId.value) {
-     return {
-       ...tab.value,
-       subtotal: currentViewTotals.value.subtotal,
-       tax_amount: currentViewTotals.value.tax,
-       total_before_tip: currentViewTotals.value.totalBeforeTip,
-       total_owed: currentViewTotals.value.totalOwed,
-       tip_amount: selectedSplitId.value === null ? (tab.value.tip_amount || 0) : 0,
-       tab_payment: tab.value.tab_payment?.filter(p => p.split_id === selectedSplitId.value) || []
-     }
+  // Always use the calculated view totals to ensure Receipt matches UI exactly
+  return {
+    ...tab.value,
+    subtotal: currentViewTotals.value.subtotal,
+    tax_amount: currentViewTotals.value.tax,
+    total_before_tip: currentViewTotals.value.totalBeforeTip,
+    total_owed: currentViewTotals.value.totalOwed,
+    tip_amount: selectedSplitId.value === null ? (tab.value.tip_amount || 0) : 0,
+    tab_payment: selectedSplitId.value 
+        ? tab.value.tab_payment?.filter(p => p.split_id === selectedSplitId.value) 
+        : tab.value.tab_payment
   }
-  
-  return tab.value
 })
 </script>
 

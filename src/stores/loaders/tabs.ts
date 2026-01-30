@@ -22,6 +22,8 @@ import type { Tab, Tabs, TabItem, TabItems, TabSplit, TabSplits, TabPayments, Ta
 import type { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { useErrorStore } from '@/stores/error'
 
+const vat = Number(import.meta.env.VITE_VAT) || 0.15
+
 export const useTabsStore = defineStore('tabs-store', () => {
   // State
   const tabs = ref<Tabs | null>(null)
@@ -178,18 +180,16 @@ export const useTabsStore = defineStore('tabs-store', () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const total = totals.find((tot: any) => tot.tab_id === t.id)
           if (total) {
-              // Fix: Calculate totals assuming Inclusive Tax (15%)
-              // The DB view might be adding tax on top, so we recalculate
-              const inclusiveTotal = total.subtotal || 0
-              const calculatedSubtotal = inclusiveTotal / 1.15
-              const calculatedTax = inclusiveTotal - calculatedSubtotal
-              const totalOwed = inclusiveTotal + (Number(t.tip_amount) || 0)
+              const rawTotalInclusive = total.subtotal || 0 // View view returns sum of items
+              const calculatedTax = rawTotalInclusive * vat
+              const calculatedSubtotal = rawTotalInclusive - calculatedTax
+              const totalOwed = rawTotalInclusive + (Number(t.tip_amount) || 0)
 
               return {
                 ...t,
                 subtotal: calculatedSubtotal,
                 tax_amount: calculatedTax,
-                total_before_tip: inclusiveTotal,
+                total_before_tip: rawTotalInclusive,
                 total_owed: totalOwed
               }
           }
@@ -440,9 +440,9 @@ export const useTabsStore = defineStore('tabs-store', () => {
       const t = tabs.value[tabIndex]
       if (!t) return
 
-      const newSubtotal = (t.subtotal || 0) + diff
-      const newTax = newSubtotal * 0.15
-      const newTotalBeforeTip = newSubtotal + newTax
+      const newTotalBeforeTip = (t.total_before_tip || 0) + diff
+      const newTax = newTotalBeforeTip * 0.15
+      const newSubtotal = newTotalBeforeTip - newTax
       const newTotalOwed = newTotalBeforeTip + (t.tip_amount || 0)
 
       tabs.value[tabIndex] = {
@@ -500,9 +500,9 @@ export const useTabsStore = defineStore('tabs-store', () => {
     // Update Tab Totals locally if quantity changed
     if (quantityChanged && tab.value && tab.value.id === tabId) {
       const diff = newItemTotal - oldItemTotal
-      tab.value.subtotal = (tab.value.subtotal || 0) + diff
-      tab.value.tax_amount = tab.value.subtotal * 0.15
-      tab.value.total_before_tip = tab.value.subtotal + tab.value.tax_amount
+      tab.value.total_before_tip = (tab.value.total_before_tip || 0) + diff
+      tab.value.tax_amount = tab.value.total_before_tip * 0.15
+      tab.value.subtotal = tab.value.total_before_tip - tab.value.tax_amount
       tab.value.total_owed = tab.value.total_before_tip + (tab.value.tip_amount || 0)
     }
 

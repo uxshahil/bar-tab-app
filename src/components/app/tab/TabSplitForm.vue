@@ -21,6 +21,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const tabsStore = useTabsStore()
+const vat = Number(import.meta.env.VITE_VAT) || 0.15
 
 const formData = ref({
   splitNumber: 2,
@@ -99,9 +100,9 @@ const createSplit = async () => {
 
         <!-- Tax Calculation -->
         <div class="space-y-2">
-          <label class="text-sm font-medium">Tax (15%)</label>
+          <label class="text-sm font-medium">Tax ({vat}%)</label>
           <input
-            :value="(formData.subtotal * 0.15).toFixed(2)"
+            :value="(formData.subtotal * vat).toFixed(2)"
             type="text"
             disabled
             class="w-full p-2 border rounded-md bg-muted"

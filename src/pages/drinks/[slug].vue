@@ -98,8 +98,8 @@ const handleAddToTab = () => {
               <span>R {{ drink.price }}</span>
             </div>
             <Button 
-              size="lg" 
-              class="rounded-full px-8 py-6 text-lg font-serif bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+              size="sm" 
+              class="rounded-full px-8 py-6 text-sm font-serif bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
               @click="handleAddToTab"
             >
               Add to Tab

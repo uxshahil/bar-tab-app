@@ -35,6 +35,8 @@ const today = new Date()
 const dateStr = today.toLocaleDateString('en-ZA').replace(/\//g, '.')
 const timeStr = today.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit', hour12: false })
 
+const vat = Number(import.meta.env.VITE_VAT) || 0.15
+const vatPercentage = (vat * 100).toFixed(1) + '%'
 </script>
 
 <template>
@@ -65,23 +67,23 @@ const timeStr = today.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-
         <div>{{ formatCurrency(item.item_total).replace('R', '').trim() }}</div>
       </div>
     </div>
-
+    
     <!-- Totals -->
     <div class="border-t border-dashed border-black pt-2 mt-2 space-y-1">
       <div class="flex justify-between font-bold">
-        <span>TOTAL ({{ items.length }} items)</span>
+        <span>{{ tip > 0 ? 'SUBTOTAL' : 'TOTAL' }} ({{ items.length }} items)</span>
         <span>{{ formatCurrency(totalBeforeTip).replace('R', '').trim() }}</span>
       </div>
        <div v-if="tip > 0" class="flex justify-between">
         <span>TIP</span>
         <span>{{ formatCurrency(tip).replace('R', '').trim() }}</span>
       </div>
-      <div class="flex justify-between font-bold text-sm mt-1">
+      <div v-if="tip > 0" class="flex justify-between font-bold text-sm mt-1">
         <span>TOTAL</span>
         <span>{{ formatCurrency(total).replace('R', '').trim() }}</span>
       </div>
       
-      <div v-if="amountPaid > 0" class="flex justify-between font-bold text-sm mt-1 border-t border-dashed border-black pt-1">
+      <div class="flex justify-between font-bold text-sm mt-1 border-t border-dashed border-black pt-1">
         <span>PAID</span>
         <span>{{ formatCurrency(amountPaid).replace('R', '').trim() }}</span>
       </div>
@@ -101,7 +103,7 @@ const timeStr = today.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-
         <span class="w-16 text-right">Net</span>
       </div>
       <div class="flex justify-between text-[10px]">
-        <span class="w-10">15.0%</span>
+        <span class="w-10">{{ vatPercentage }}</span>
         <span class="w-16 text-right">{{ formatCurrency(totalBeforeTip).replace('R', '').trim() }}</span>
         <span class="w-16 text-right">{{ formatCurrency(totalTax).replace('R', '').trim() }}</span>
         <span class="w-16 text-right">{{ formatCurrency(subtotal).replace('R', '').trim() }}</span>
