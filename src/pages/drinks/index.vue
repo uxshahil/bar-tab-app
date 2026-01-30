@@ -3,15 +3,16 @@ import { columns } from '@/components/ui/data-table-columns/DataTableColumnsDrin
 import { fetchDrinks } from '@/services/supabase/queries/drinkQueries'
 import { useRoute } from 'vue-router'
 import type { Drinks, Drink } from '@/services/supabase/types/drinkTypes'
-import AppAddToTab from '@/components/app/tab/AppAddToTab.vue'
 
 usePageStore().pageData.title = 'Drinks'
 
 const route = useRoute()
 
 const drinks = ref<Drinks | null>(null)
-const selectedDrink = ref<Drink | null>(null)
-const isAddToTabOpen = ref(false)
+
+// Add to Tab Logic (Global Store)
+import { useAddToTabStore } from '@/stores/ui/addToTab'
+const addToTabStore = useAddToTabStore()
 
 const getDrinks = async (search?: string) => {
   const { data, error, status } = await fetchDrinks(search)
@@ -22,8 +23,7 @@ const getDrinks = async (search?: string) => {
 }
 
 const onAddToTab = (drink: Drink) => {
-  selectedDrink.value = drink
-  isAddToTabOpen.value = true
+  addToTabStore.open(drink)
 }
 
 // Load initially using current query param
@@ -52,11 +52,6 @@ watch(
           onAddToTab
         }
       }"
-    />
-
-    <AppAddToTab 
-      v-model:open="isAddToTabOpen"
-      :drink="selectedDrink"
     />
   </div>
 </template>

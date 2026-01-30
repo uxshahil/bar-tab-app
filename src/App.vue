@@ -1,6 +1,10 @@
 <script setup lang="ts">
 const { activeError } = storeToRefs(useErrorStore())
 const errorStore = useErrorStore()
+import { useAddToTabStore } from '@/stores/ui/addToTab'
+import AppAddToTab from '@/components/app/tab/AppAddToTab.vue'
+
+const addToTabStore = useAddToTabStore()
 
 onErrorCaptured((error) => {
   errorStore.setError({ error })
@@ -63,4 +67,9 @@ useMeta({
       </RouterView>
     </Component>
   </Transition>
+
+  <AppAddToTab 
+    v-model:open="addToTabStore.isOpen"
+    :drink="addToTabStore.drink"
+  />
 </template>
