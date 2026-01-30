@@ -1,13 +1,13 @@
 import { RouterLink } from 'vue-router'
 import DropdownAction from '@/components/ui/data-table-drop-down/DataTableDropDown.vue'
-import profileRequests from '@/services/supabase/requests/profileRequests.ts'
+import profileApi from '@/services/api/profileApi.ts'
 // import useUsersStore from '@/stores/loaders/users'
 import type { Profiles } from '@/services/supabase/types/profileTypes'
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { DeleteUser, EditUser } from '@/interfaces/UserInterfaces'
 // import { use } from '@formkit/core'
 
-const { deleteProfile, editProfile } = profileRequests
+const { deleteProfile, editProfile } = profileApi
 // const profileStore = useUsersStore();
 
 

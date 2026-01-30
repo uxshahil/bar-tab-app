@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CreateNewUser } from '@/interfaces/UserInterfaces'
-import profileRequests from '@/services/supabase/requests/profileRequests'
+import profileApi from '@/services/api/profileApi'
 
 const sheetOpen = defineModel<boolean>()
 

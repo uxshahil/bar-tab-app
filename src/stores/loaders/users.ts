@@ -2,7 +2,7 @@ import type { Profile as User, Profiles as Users } from '@/services/supabase/typ
 import type { CreateNewUser, EditUser, DeleteUser } from '@/interfaces/UserInterfaces'
 import { profilesQuery as usersQuery, profileQuery as userQuery } from '@/services/supabase/queries/profileQueries'
 // Change the import to use named exports
-import profileRequests from '@/services/supabase/requests/profileRequests'
+import profileApi from '@/services/api/profileApi'
 
 export const useUsersStore = defineStore('users-store', () => {
   // State
@@ -77,7 +77,7 @@ export const useUsersStore = defineStore('users-store', () => {
       
       // Use the createProfile function which should return a Promise
       // Add type assertion to ensure profileData matches the expected type
-      const userId = await profileRequests.createProfile(profileData as CreateNewUser)
+      const userId = await profileApi.createProfile(profileData as CreateNewUser)
       // Refresh users list
       await getUsers()
 
@@ -114,7 +114,7 @@ export const useUsersStore = defineStore('users-store', () => {
         data: updates
       }
 
-      const result = await profileRequests.editProfile(editUserData)
+      const result = await profileApi.editProfile(editUserData)
       
       // Check if the update was successful
       if (result.error) {
@@ -143,7 +143,7 @@ export const useUsersStore = defineStore('users-store', () => {
         id: userId
       }
 
-      await profileRequests.deleteProfile(deleteData)
+      await profileApi.deleteProfile(deleteData)
 
       // Refresh users list
       await getUsers()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CreateNewDrink } from '@/interfaces/DrinkInterfaces'
-import drinkRequest from '@/services/supabase/requests/drinkRequests'
+import drinkApi from '@/services/api/drinkApi'
 
 const sheetOpen = defineModel<boolean>()
 
