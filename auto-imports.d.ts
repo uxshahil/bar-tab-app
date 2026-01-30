@@ -63,6 +63,7 @@ declare global {
   const useAddToTabStore: typeof import('./src/stores/ui/addToTab').useAddToTabStore
   const useAttrs: typeof import('vue').useAttrs
   const useAuthStore: typeof import('./src/stores/auth').useAuthStore
+  const useBarsStore: typeof import('./src/stores/loaders/bars').useBarsStore
   const useCollabs: typeof import('./src/composables/collabs').useCollabs
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
@@ -70,6 +71,7 @@ declare global {
   const useErrorStore: typeof import('./src/stores/error').useErrorStore
   const useFormErrors: typeof import('./src/composables/formErrors').useFormErrors
   const useId: typeof import('vue').useId
+  const useMenusStore: typeof import('./src/stores/loaders/menus').useMenusStore
   const useMeta: typeof import('vue-meta').useMeta
   const useModel: typeof import('vue').useModel
   const usePageStore: typeof import('./src/stores/page').usePageStore

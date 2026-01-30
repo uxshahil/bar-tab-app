@@ -23,7 +23,7 @@ const links = [
     to: '/menus',
     icon: 'lucide:square-menu',
     isPublic: true,
-    role: ['admin', 'bar-staff', 'bar-manager'],
+    role: ['admin', 'bar-manager'],
   },
   {
     title: 'Drinks',
@@ -38,13 +38,6 @@ const links = [
     icon: 'lucide:apple',
     isPublic: true,
     role: ['admin', 'bar-staff', 'bar-manager'],
-  },
-  {
-    title: 'My Tabs',
-    to: '/tabs',
-    icon: 'lucide:badge-check',
-    isPublic: false,
-    role: ['bar-staff', 'bar-manager'],
   },
   {
     title: 'Users',

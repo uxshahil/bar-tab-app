@@ -4,7 +4,7 @@ import AppRightSidebar from '@/components/layout/AppRightSidebar.vue'
 
 const { pageData } = storeToRefs(usePageStore())
 
-const taskSheetOpen = ref({ user: true, tab: false, drink: false })
+const taskSheetOpen = ref({ user: false, tab: false, drink: false })
 
 const menuOpen = ref(false)
 const toggleMenu = () => (menuOpen.value = !menuOpen.value)
@@ -35,8 +35,8 @@ provide(menuKey, {
 <template>
   <div>
     <Sidebar @userClicked="userClicked" @tabClicked="tabClicked" @drinkClicked="drinkClicked" />
-    <AppNewUser v-model="taskSheetOpen.user" />
-    <AppNewDrink v-model="taskSheetOpen.drink" />
+    <AppUserSheet v-model:open="taskSheetOpen.user" />
+    <AppDrinkSheet v-model:open="taskSheetOpen.drink" />
     <!-- <AppNewTab v-model="taskSheetOpen.tab" /> -->
 
     <div

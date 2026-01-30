@@ -72,7 +72,16 @@ watch(
         category: newDrink.category.name,
         alcoholic: newDrink.alcoholic,
         glass: newDrink.glass,
-        instructions: newDrink.instructions || '',
+        instructions: (() => {
+            const raw = newDrink.instructions || ''
+            if (raw.trim().startsWith('[')) {
+                try {
+                    const parsed = JSON.parse(raw)
+                    if (Array.isArray(parsed)) return parsed.join('\n')
+                } catch { /* ignore */ }
+            }
+            return raw
+        })(),
         thumb_url: newDrink.thumb_url,
         ingredients: (newDrink.ingredients || []).join(', ') as unknown as string[],
         measurements: (newDrink.measurements || []).join(', ') as unknown as string[],
@@ -132,7 +141,7 @@ const handleSubmit = async (fields: any) => {
 
 <template>
   <Sheet v-model:open="sheetOpen">
-    <SheetContent class="overflow-y-auto max-h-screen">
+    <SheetContent class="overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>{{ isEditing ? 'Edit Drink' : 'Create New Drink' }}</SheetTitle>
         <SheetDescription>

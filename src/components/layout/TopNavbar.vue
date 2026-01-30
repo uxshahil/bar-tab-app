@@ -55,7 +55,7 @@ const onTabSelected = (tab: any) => {
           <iconify-icon v-else icon="lucide:moon" />
         </Transition>
       </Button>
-      <div class="w-8">
+      <div class="w-8 h-8">
         <DropdownMenu v-if="profile">
           <DropdownMenuTrigger>
             <Avatar>

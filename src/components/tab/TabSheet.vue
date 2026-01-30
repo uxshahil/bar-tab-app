@@ -15,7 +15,7 @@ const handleOpenChange = (open: boolean) => {
 
 <template>
   <Sheet :open="isOpen" @update:open="handleOpenChange">
-    <SheetContent side="right" class="w-full sm:w-2/3 lg:w-1/2 overflow-y-auto">
+    <SheetContent side="right" class="w-full sm:w-2/3 lg:w-1/2 overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>Tab Details</SheetTitle>
       </SheetHeader>

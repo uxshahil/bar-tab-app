@@ -49,8 +49,22 @@ const safeDate = computed(() => {
 
 const parsedInstructions = computed(() => {
     if (!drink.value?.instructions) return []
-    // Split by newlines. If single line, try splitting by periods if multiple sentences exist.
+    
     const text = drink.value.instructions
+    
+    // 1. Try JSON Parse (New Format)
+    if (text.trim().startsWith('[')) {
+        try {
+            const parsed = JSON.parse(text)
+            if (Array.isArray(parsed)) return parsed
+        } catch (e) {
+            // Fallthrough to text parsing if invalid JSON
+            console.warn('Failed to parse instructions JSON:', e)
+        }
+    }
+
+    // 2. Legacy Text Parsing
+    // Split by newlines. If single line, try splitting by periods if multiple sentences exist.
     if (text.includes('\n')) {
         return text.split('\n').filter((step: string) => step.trim().length > 0)
     }

@@ -3,6 +3,7 @@ import type { CreateNewUser, EditUser, DeleteUser } from '@/interfaces/UserInter
 import { profilesQuery as usersQuery, profileQuery as userQuery } from '@/services/supabase/queries/profileQueries'
 // Change the import to use named exports
 import profileApi from '@/services/api/profileApi'
+import { socket } from '@/services/socket/socket'
 
 export const useUsersStore = defineStore('users-store', () => {
   // State
@@ -158,6 +159,25 @@ export const useUsersStore = defineStore('users-store', () => {
       return false
     }
   }
+
+  // Socket Listeners
+  socket.on('user:created', () => {
+      console.log('Socket: user:created')
+      getUsers()
+  })
+
+  socket.on('user:updated', ({ id }) => {
+      console.log('Socket: user:updated', id)
+      if (user.value && String(user.value.id) === String(id)) {
+          getUser('id', String(id))
+      }
+      getUsers()
+  })
+
+  socket.on('user:deleted', () => {
+      console.log('Socket: user:deleted')
+      getUsers()
+  })
 
   return {
     // State

@@ -133,7 +133,7 @@ watch(isOpen, async (newVal) => {
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent class="w-[400px] sm:w-[600px] overflow-y-auto">
+    <SheetContent class="w-[400px] sm:w-[600px] overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>Split Bill</SheetTitle>
         <SheetDescription>

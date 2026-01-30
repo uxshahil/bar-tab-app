@@ -21,6 +21,7 @@ import { useMemoize } from '@vueuse/core'
 import type { Tab, Tabs, TabItem, TabItems, TabSplit, TabSplits, TabPayments, TabSplitInsert } from '@/services/supabase/types/tabTypes'
 import type { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { useErrorStore } from '@/stores/error'
+import { socket } from '@/services/socket/socket'
 
 const vat = Number(import.meta.env.VITE_VAT) || 0.15
 
@@ -567,6 +568,62 @@ export const useTabsStore = defineStore('tabs-store', () => {
       return false
     }
   }
+
+  // Socket Listeners
+  socket.on('tab:created', ({ id }) => {
+      console.log('Socket: tab:created', id)
+      loadTabs.delete('all-tabs')
+      loadOpenTabs.delete('open-tabs')
+      if (tabs.value) getTabs()
+  })
+
+  socket.on('tab:updated', ({ id }) => {
+      console.log('Socket: tab:updated', id)
+      const strId = String(id)
+      loadTab.delete(strId)
+      
+      // If currently viewing this tab, refetch
+      if (tab.value && String(tab.value.id) === strId) {
+          getTab(strId)
+      }
+
+      // Refresh lists
+      loadTabs.delete('all-tabs')
+      loadOpenTabs.delete('open-tabs')
+      if (tabs.value) getTabs()
+  })
+
+  // Item events
+  const handleItemUpdate = (tabId: number) => {
+      console.log('Socket: item update for tab', tabId)
+      const strId = String(tabId)
+      loadTabItems.delete(strId)
+      loadTabSplits.delete(strId)
+      loadTabPayments.delete(strId)
+
+      // If viewing this tab, refresh items
+      if (tab.value && String(tab.value.id) === strId) {
+          getTabItems(strId)
+          getTabSplits(strId)
+          getTabPayments(strId)
+          getTab(strId) // Refresh totals
+      }
+      
+      // Refresh lists
+      loadTabs.delete('all-tabs')
+      loadOpenTabs.delete('open-tabs')
+      if (tabs.value) getTabs()
+  }
+
+  socket.on('tab:item:added', ({ tab_id }) => handleItemUpdate(tab_id))
+  socket.on('tab:item:updated', ({ tab_id }) => { 
+      if (tab_id) handleItemUpdate(tab_id) 
+      else console.warn('Socket: tab:item:updated missing tab_id')
+  })
+  socket.on('tab:item:deleted', ({ tab_id }) => {
+      if (tab_id) handleItemUpdate(tab_id)
+      else console.warn('Socket: tab:item:deleted missing tab_id')
+  })
 
   return {
     // State

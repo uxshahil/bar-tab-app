@@ -90,7 +90,7 @@ const handleSubmit = async (fields: any) => {
 
 <template>
   <Sheet v-model:open="sheetOpen">
-    <SheetContent class="overflow-y-auto max-h-screen">
+    <SheetContent class="overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>{{ isEditing ? 'Edit User' : 'Create New User' }}</SheetTitle>
       </SheetHeader>

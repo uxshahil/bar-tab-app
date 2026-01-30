@@ -21,7 +21,7 @@ const { tab } = storeToRefs(tabsStore)
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent class="w-[400px] sm:w-[540px] overflow-y-auto">
+    <SheetContent class="w-[400px] sm:w-[540px] overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>Tab Details</SheetTitle>
       </SheetHeader>

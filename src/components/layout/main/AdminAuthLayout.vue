@@ -35,9 +35,9 @@ provide(menuKey, {
 <template>
   <div>
     <Sidebar @userClicked="userClicked" @tabClicked="tabClicked" @drinkClicked="drinkClicked" />
-    <AppNewUser v-model="taskSheetOpen.user" />
+    <AppUserSheet v-model:open="taskSheetOpen.user" />
     <AppNewTab v-model="taskSheetOpen.tab" />
-    <AppNewDrink v-model="taskSheetOpen.drink" />
+    <AppDrinkSheet v-model:open="taskSheetOpen.drink" />
 
     <!-- Global Tab Sheet -->
     <TabSheet />

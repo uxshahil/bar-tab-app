@@ -57,7 +57,7 @@ const createTab = async (formData: Partial<Tab>) => {
 
 <template>
   <Sheet v-model:open="sheetOpen">
-    <SheetContent>
+    <SheetContent class="overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>Create New Tab</SheetTitle>
       </SheetHeader>

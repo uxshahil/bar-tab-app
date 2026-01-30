@@ -1,21 +1,12 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsBars'
-import { barsQuery } from '@/services/supabase/queries/barQueries'
-import type { Bars } from '@/services/supabase/types/barTypes'
-import AppResourcePage from '@/components/common/AppResourcePage.vue'
+import { storeToRefs } from 'pinia'
+import { useBarsStore } from '@/stores/loaders/bars'
 
+const barsStore = useBarsStore()
+const { bars } = storeToRefs(barsStore)
 
-
-const bars = ref<Bars | null>(null)
-const getBars = async () => {
-  const { data, error, status } = await barsQuery
-
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  bars.value = data
-}
-
-await getBars()
+await barsStore.getBars()
 </script>
 
 <template>

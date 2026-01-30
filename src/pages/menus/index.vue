@@ -1,21 +1,12 @@
 <script setup lang="ts">
 import { columns } from '@/components/ui/data-table-columns/DataTableColumnsMenus'
-import { menusWithCategoriesQuery } from '@/services/supabase/queries/menuQueries'
-import type { MenusWithCategories } from '@/services/supabase/types/menuTypes'
-import AppResourcePage from '@/components/common/AppResourcePage.vue'
+import { storeToRefs } from 'pinia'
+import { useMenusStore } from '@/stores/loaders/menus'
 
+const menusStore = useMenusStore()
+const { menus } = storeToRefs(menusStore)
 
-
-const menus = ref<MenusWithCategories | null>(null)
-const getMenus = async () => {
-  const { data, error, status } = await menusWithCategoriesQuery
-
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  menus.value = data
-}
-
-await getMenus()
+await menusStore.getMenus()
 </script>
 
 <template>

@@ -30,7 +30,7 @@
 
     <!-- New Tab Sheet -->
     <Sheet v-model:open="showNewTabSheet">
-      <SheetContent>
+      <SheetContent class="overflow-y-auto max-h-screen px-4">
         <SheetHeader>
           <SheetTitle>Create New Tab</SheetTitle>
         </SheetHeader>
@@ -49,7 +49,7 @@
 
     <!-- Open Existing Tab Sheet -->
     <Sheet v-model:open="showOpenTabSheet">
-      <SheetContent>
+      <SheetContent class="overflow-y-auto max-h-screen px-4">
         <SheetHeader>
           <SheetTitle>Open Existing Tab</SheetTitle>
         </SheetHeader>
@@ -69,7 +69,7 @@
 
     <!-- Add Item Sheet -->
     <Sheet v-model:open="showAddItemSheet">
-      <SheetContent>
+      <SheetContent class="overflow-y-auto max-h-screen px-4">
         <SheetHeader>
           <SheetTitle>Add Item to Tab</SheetTitle>
         </SheetHeader>

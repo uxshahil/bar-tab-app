@@ -151,7 +151,7 @@ const splitOptions = computed(() => {
 
 <template>
   <Sheet v-model:open="isOpen">
-    <SheetContent class="overflow-y-auto">
+    <SheetContent class="overflow-y-auto max-h-screen px-4">
       <SheetHeader>
         <SheetTitle>Add to Tab</SheetTitle>
         <SheetDescription v-if="drink">
