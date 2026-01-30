@@ -26,6 +26,10 @@ const subtotal = computed(() => props.tab.subtotal || 0)
 const total = computed(() => props.tab.total_owed || 0)
 const tip = computed(() => props.tab.tip_amount || 0)
 const totalBeforeTip = computed(() => props.tab.total_before_tip || 0)
+// Calculate paid amount from payments array
+const amountPaid = computed(() => {
+    return props.tab.tab_payment?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
+})
 
 const today = new Date()
 const dateStr = today.toLocaleDateString('en-ZA').replace(/\//g, '.')
@@ -73,8 +77,18 @@ const timeStr = today.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-
         <span>{{ formatCurrency(tip).replace('R', '').trim() }}</span>
       </div>
       <div class="flex justify-between font-bold text-sm mt-1">
-        <span>TOTAL PAID</span>
+        <span>TOTAL</span>
         <span>{{ formatCurrency(total).replace('R', '').trim() }}</span>
+      </div>
+      
+      <div v-if="amountPaid > 0" class="flex justify-between font-bold text-sm mt-1 border-t border-dashed border-black pt-1">
+        <span>PAID</span>
+        <span>{{ formatCurrency(amountPaid).replace('R', '').trim() }}</span>
+      </div>
+      
+       <div v-if="amountPaid >= total" class="flex justify-between text-xs mt-1">
+        <span>CHANGE</span>
+        <span>{{ formatCurrency(amountPaid - total).replace('R', '').trim() }}</span>
       </div>
     </div>
 

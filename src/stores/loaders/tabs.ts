@@ -13,6 +13,7 @@ import {
   deleteTabItemQuery,
   createTabSplitQuery,
   updateTabSplitQuery,
+  deleteTabSplitQuery,
   createTabPaymentQuery,
   tabTotalsQuery
 } from '@/services/supabase/queries/tabQueries'
@@ -166,7 +167,7 @@ export const useTabsStore = defineStore('tabs-store', () => {
 
     if (data) {
       // Helper to merge totals
-      const mergeTotals = async (rawTabs: Tab[]) => {
+      const mergeTotals = async (rawTabs: any[]) => {
         if (!rawTabs || rawTabs.length === 0) return rawTabs
         const tabIds = rawTabs.map(t => t.id)
         const { data: totals } = await tabTotalsQuery(tabIds)
@@ -177,13 +178,20 @@ export const useTabsStore = defineStore('tabs-store', () => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const total = totals.find((tot: any) => tot.tab_id === t.id)
           if (total) {
-            return {
-              ...t,
-              subtotal: total.subtotal || 0,
-              tax_amount: total.tax_amount || 0,
-              total_before_tip: total.total_before_tip || 0,
-              total_owed: total.total_owed || 0
-            }
+              // Fix: Calculate totals assuming Inclusive Tax (15%)
+              // The DB view might be adding tax on top, so we recalculate
+              const inclusiveTotal = total.subtotal || 0
+              const calculatedSubtotal = inclusiveTotal / 1.15
+              const calculatedTax = inclusiveTotal - calculatedSubtotal
+              const totalOwed = inclusiveTotal + (Number(t.tip_amount) || 0)
+
+              return {
+                ...t,
+                subtotal: calculatedSubtotal,
+                tax_amount: calculatedTax,
+                total_before_tip: inclusiveTotal,
+                total_owed: totalOwed
+              }
           }
           return t
         })
@@ -390,6 +398,22 @@ export const useTabsStore = defineStore('tabs-store', () => {
     return true
   }
 
+  // Delete tab split
+  const deleteTabSplit = async (splitId: string | number, tabId: string | number) => {
+    const { error, status } = await deleteTabSplitQuery(splitId)
+
+    if (error) {
+      useErrorStore().setError({ error, customCode: status })
+      return false
+    }
+
+    // Refresh splits
+    loadTabSplits.delete(tabId.toString())
+    await getTabSplits(tabId.toString())
+    
+    return true
+  }
+
   // Create payment
   const createPayment = async (paymentData: { tab_id: number; amount_paid: number; payment_method: string; status?: string; split_id?: number | null; tip_added?: number | null }) => {
     const { data, error, status } = await createTabPaymentQuery(paymentData as any)
@@ -414,6 +438,8 @@ export const useTabsStore = defineStore('tabs-store', () => {
     const tabIndex = tabs.value.findIndex(t => t.id === tabId)
     if (tabIndex !== -1) {
       const t = tabs.value[tabIndex]
+      if (!t) return
+
       const newSubtotal = (t.subtotal || 0) + diff
       const newTax = newSubtotal * 0.15
       const newTotalBeforeTip = newSubtotal + newTax
@@ -567,6 +593,7 @@ export const useTabsStore = defineStore('tabs-store', () => {
     deleteTabItem,
     createTabSplit,
     updateTabSplit,
+    deleteTabSplit,
     createPayment,
     
     // Composite Action: Add Drink to Tab (handles item, split, tax, totals)

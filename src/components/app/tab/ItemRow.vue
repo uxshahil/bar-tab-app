@@ -55,14 +55,7 @@ const truncateNote = (text: string, length = 20) => {
   <div v-if="editingItemId !== item.id" class="flex justify-between items-start cursor-pointer" @click="emit('startEditing', item)">
     <div class="flex gap-2 flex-1">
       <span class="font-bold min-w-[1.5rem]">{{ item.quantity }}x</span>
-      <div class="flex flex-col">
-        <div class="flex items-center gap-2">
-          <span class="font-medium leading-none">{{ item.menu_item?.name || `Item ${item.id}` }}</span>
-          <span class="text-[10px] text-muted-foreground font-mono whitespace-nowrap">
-            {{ getRelativeTime(item.created_at) }}
-          </span>
-        </div>
-        
+      <div class="flex">        
         <!-- Expandable Notes -->
         <div v-if="item.special_instructions" class="mt-0.5">
           <span 
@@ -78,6 +71,12 @@ const truncateNote = (text: string, length = 20) => {
             @click.stop="emit('toggleNote', item.id)"
           >
             {{ item.special_instructions }}
+          </span>
+        </div>
+        <div class="flex items-left justify-center gap-2 flex-col pt-0.5">
+          <span class="font-medium leading-none">{{ item.menu_item?.name || `Item ${item.id}` }}</span>
+          <span class="text-[10px] text-muted-foreground font-mono whitespace-nowrap text-left ">
+            {{ getRelativeTime(item.created_at) }}
           </span>
         </div>
       </div>

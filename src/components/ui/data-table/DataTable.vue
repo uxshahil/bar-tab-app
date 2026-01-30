@@ -72,7 +72,7 @@ const table = useVueTable({
       </Table>
     </div>
 
-    <div class="flex items-center justify-between px-2">
+    <div class="flex items-center justify-between pl-4 pr-2 pb-4">
       <div class="flex-1 text-sm text-muted-foreground">
         Showing {{ table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1 }} to
         {{ Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, table.getFilteredRowModel().rows.length) }} of

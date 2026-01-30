@@ -2,6 +2,7 @@
 import { useTabsStore } from '@/stores/loaders/tabs'
 import { storeToRefs } from 'pinia'
 import { profileQuery } from '@/services/supabase/queries/profileQueries'
+import { barByIdQuery } from '@/services/supabase/queries/barQueries'
 import type { Profile } from '@/services/supabase/types/profileTypes'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
@@ -14,6 +15,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const staffProfile = ref<Profile | null>(null)
+const barName = ref<string>('BAR TAB LIQUORS')
 
 // Editing State
 const editingItemId = ref<number | null>(null)
@@ -206,6 +208,14 @@ onMounted(async () => {
   if (tab.value?.user_id) {
     await loadStaffProfile(tab.value.user_id)
   }
+  
+  if (tab.value?.bar_id) {
+    const { data: barData } = await barByIdQuery(tab.value.bar_id)
+    if (barData?.name) {
+      barName.value = barData.name
+    }
+  }
+
   await tabsStore.getTabItems(props.tabId.toString())
   await tabsStore.getTabSplits(props.tabId.toString())
   await tabsStore.getTabPayments(props.tabId.toString())
@@ -315,6 +325,32 @@ const sendEmail = () => {
     alert(`Receipt sent to user@example.com (Simulated)`)
     showReceipt.value = false
 }
+
+// Receipt Computed Data
+const receiptItems = computed(() => {
+  if (selectedSplitId.value) {
+    return getSplitItems(selectedSplitId.value)
+  }
+  return tabItems.value || []
+})
+
+const receiptTab = computed(() => {
+  if (!tab.value) return null
+  
+  if (selectedSplitId.value) {
+     return {
+       ...tab.value,
+       subtotal: currentViewTotals.value.subtotal,
+       tax_amount: currentViewTotals.value.tax,
+       total_before_tip: currentViewTotals.value.totalBeforeTip,
+       total_owed: currentViewTotals.value.totalOwed,
+       tip_amount: selectedSplitId.value === null ? (tab.value.tip_amount || 0) : 0,
+       tab_payment: tab.value.tab_payment?.filter(p => p.split_id === selectedSplitId.value) || []
+     }
+  }
+  
+  return tab.value
+})
 </script>
 
 <template>
@@ -588,9 +624,10 @@ const sendEmail = () => {
     <DialogContent class="max-w-[360px] p-0 bg-transparent border-0 shadow-none">
         <div class="relative">
             <AppReceipt 
-                v-if="tab && tabItems"
-                :tab="tab"
-                :items="tabItems" 
+                v-if="receiptTab && receiptItems"
+                :tab="receiptTab"
+                :items="receiptItems" 
+                :merchant-name="barName"
             />
             <div class="absolute -bottom-12 left-0 right-0 flex justify-center gap-2">
                 <Button @click="sendEmail" class="shadow-lg">

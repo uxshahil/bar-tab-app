@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import type { Drink } from '@/services/supabase/types/drinkTypes'
 
 const props = defineProps<{
@@ -24,6 +26,12 @@ const selectedSplitId = ref<number | null>(null)
 const specialInstructions = ref('')
 const showNewTabForm = ref(false)
 
+const newTabForm = reactive({
+  tabNumber: '',
+  userId: '',
+  specialNotes: ''
+})
+
 // Reset state when sheet opens/closes or drink changes
 watch(isOpen, (newVal) => {
   if (newVal) {
@@ -41,7 +49,14 @@ watch(isOpen, (newVal) => {
     quantity.value = 1
     selectedSplitId.value = null
     specialInstructions.value = ''
+    selectedSplitId.value = null
+    specialInstructions.value = ''
     showNewTabForm.value = false
+    
+    // Reset new tab form
+    newTabForm.tabNumber = ''
+    newTabForm.userId = ''
+    newTabForm.specialNotes = ''
   }
 })
 
@@ -80,12 +95,12 @@ const generateTabNumber = async () => {
   return `${datePrefix}-${nextSequence.toString().padStart(4, '0')}`
 }
 
-const createNewTab = async (formData: any) => {
-  const tabNumber = formData.tab_number || await generateTabNumber()
+const createNewTab = async () => {
+  const tabNumber = newTabForm.tabNumber || await generateTabNumber()
   
-  let notes = formData.special_notes || ''
-  if (formData.user_id) {
-    notes = `Customer: ${formData.user_id}\n${notes}`
+  let notes = newTabForm.specialNotes || ''
+  if (newTabForm.userId) {
+    notes = `Customer: ${newTabForm.userId}\n${notes}`
   }
 
   const tabId = await tabsStore.createTab({
@@ -146,7 +161,7 @@ const splitOptions = computed(() => {
         </SheetDescription>
       </SheetHeader>
 
-      <div class="mt-6">
+      <div class="mt-6 px-4">
         <!-- MODE: Select Tab -->
         <div v-if="mode === 'select-tab'" class="space-y-4">
           <div class="flex gap-2 mb-4">

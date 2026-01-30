@@ -9,3 +9,9 @@ export const barQuery = (slug: string) => supabase
   .select(`*, bar_menu (menu_name)`)
   .eq('slug', slug)
   .single()
+
+export const barByIdQuery = (id: number) => supabase
+  .from('bar')
+  .select(`*, bar_menu (menu_name)`)
+  .eq('id', id)
+  .single()

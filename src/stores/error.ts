@@ -12,12 +12,23 @@ export const useErrorStore = defineStore('error-store', () => {
     error: string | PostgrestError | Error
     customCode?: number
   }) => {
-    if (typeof error === 'string') isCustomError.value = true
-
-    if (typeof error === 'string' || error instanceof Error) {
-      activeError.value = typeof error === 'string' ? Error(error) : error
-      activeError.value.customCode = customCode
+    if (typeof error === 'string') {
+      activeError.value = { 
+         message: error, 
+         code: customCode?.toString() || 'UNKNOWN',
+         details: '',
+         hint: '',
+         statusCode: customCode
+      } as ExtendedPostgrestError
+      isCustomError.value = true
       return
+    }
+
+    if (error instanceof Error) {
+        const customError = error as CustomError
+        customError.customCode = customCode
+        activeError.value = customError
+        return
     }
 
     const extendedPostgrestError = error as ExtendedPostgrestError

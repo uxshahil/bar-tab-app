@@ -113,6 +113,12 @@ export const updateTabSplitQuery = (splitId: string | number, updates: Partial<T
   .eq('id', splitId as number)
   .select()
 
+// Delete tab split
+export const deleteTabSplitQuery = (splitId: string | number) => supabase
+  .from('tab_split')
+  .delete()
+  .eq('id', Number(splitId))
+
 // Count tabs created today
 export const todaysTabsCountQuery = () => {
   const today = new Date()

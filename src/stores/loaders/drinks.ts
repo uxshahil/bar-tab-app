@@ -58,13 +58,24 @@ export const useDrinksStore = defineStore('drinks-store', () => {
     validateCache({ ref: drink, query: drinkQuery, key: id, loaderFn: loadDrink })
   }
 
-  const updateDrink = async () => {
-    if (!drink.value) return
+  const updateDrink = async (id: number, updates: Partial<Drink>) => {
+    const { error, status } = await updateDrinkQuery(updates, id)
+    
+    if (error) {
+      useErrorStore().setError({ error, customCode: status })
+      return false
+    }
 
-    const { id, ...drinkProperties } = drink.value
+    // Refresh list if needed or update local state
+    // For now, simpler invalidation is safer
+    if (drink.value?.id === id) {
+      await getDrink(id.toString())
+    }
+    
+    // Also refresh the main list
+    await getDrinks()
 
-    const {error, status} = await updateDrinkQuery(drinkProperties, id)
-    if (error) useErrorStore().setError({ error, customCode: status })
+    return true
   }
 
   const deleteDrink = async () => {

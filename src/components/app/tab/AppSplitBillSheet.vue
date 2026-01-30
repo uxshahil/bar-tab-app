@@ -23,11 +23,11 @@ const initializeSplits = async () => {
   if (!tabSplits.value || tabSplits.value.length === 0) {
     await createNewSplit()
   }
-}
 
-const createNewSplit = async () => {
   loading.value = true
-  const nextSplitNumber = (tabSplits.value?.length || 0) + 1
+  // Fix: Find the maximum split number to avoid conflicts after deletion
+  const maxSplitNumber = tabSplits.value?.reduce((max, s) => Math.max(max, s.split_number || 0), 0) || 0
+  const nextSplitNumber = maxSplitNumber + 1
   
   await tabsStore.createTabSplit({
     tab_id: Number(props.tabId),
@@ -42,6 +42,14 @@ const createNewSplit = async () => {
     settled_at: null
   })
   
+  loading.value = false
+}
+
+const deleteSplit = async (splitId: number) => {
+  if (!confirm(`Are you sure you want to delete Split? Items will be returned to unassigned.`)) return
+  
+  loading.value = true
+  await tabsStore.deleteTabSplit(splitId, props.tabId)
   loading.value = false
 }
 
@@ -110,9 +118,9 @@ watch(isOpen, async (newVal) => {
         </SheetDescription>
       </SheetHeader>
 
-      <div class="mt-6 space-y-6 px-4">
+      <div class="space-y-6 px-4 pb-2">
         <!-- Splits Summary -->
-        <div class="flex gap-2 overflow-x-auto pb-2">
+        <div class="flex gap-2 overflow-x-auto py-4">
           <Button variant="outline" class="h-auto min-w-[100px]" @click="createNewSplit" :disabled="loading">
             <iconify-icon icon="lucide:plus" class="mr-2" />
             Add Split
@@ -120,8 +128,16 @@ watch(isOpen, async (newVal) => {
           <div 
             v-for="split in tabSplits" 
             :key="split.id"
-            class="min-w-[120px] p-3 border rounded-lg bg-muted/50"
+            class="min-w-[120px] p-2 border rounded-lg bg-muted/50 relative group"
           >
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                class="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-background border text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-10"
+                @click.stop="deleteSplit(split.id)"
+            >
+                <iconify-icon icon="lucide:x" class="text-[10px]" />
+            </Button>
             <div class="font-medium text-sm">Split {{ split.split_number }}</div>
             <div class="text-lg font-bold mt-1">{{ formatCurrency(split.total_owed) }}</div>
             <div class="text-xs text-muted-foreground capitalize">{{ split.status }}</div>
