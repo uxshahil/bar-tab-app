@@ -63,16 +63,38 @@ const parsedInstructions = computed(() => {
         }
     }
 
-    // 2. Legacy Text Parsing
-    // Split by newlines. If single line, try splitting by periods if multiple sentences exist.
+    // 2. Enhanced List Parsing (Frontend Fallback)
+    const raw = text.trim()
+
+    // Pattern A: Numbered Lists (e.g. "1. Step 2.Step")
+    // Handles "1. ", "1.", and missing spaces like "2.Step"
+    if (/\d+\.\s*/.test(raw)) {
+        const parts = raw.split(/(\d+\.\s*)/).filter(p => p.trim())
+        const steps = []
+        for (let i = 0; i < parts.length; i++) {
+            if (/^\d+\.\s*$/.test(parts[i])) {
+                if (parts[i+1]) {
+                    steps.push(parts[i+1].trim())
+                    i++
+                }
+            } else if (i === 0 && parts[0].trim()) {
+                 // Text before the first number?
+                 steps.push(parts[0].trim())
+            }
+        }
+        if (steps.length > 0) return steps
+    }
+    
+    // Pattern B: Sentence Splitting (e.g. "Mix. Pour.")
+    // Split by Period + Space + Uppercase Letter to avoid "oz. vodka"
+    if (raw.includes('. ')) {
+        const sentences = raw.split(/\.\s+(?=[A-Z])/).map(s => s.trim())
+        if (sentences.length > 1) return sentences
+    }
+
+    // 3. Fallback: Newlines
     if (text.includes('\n')) {
         return text.split('\n').filter((step: string) => step.trim().length > 0)
-    }
-    // Optional: split by '. ' but ensure we don't break abbreviations too easily. 
-    // For now, let's just return the single block if no newlines, or split by period for style.
-    // Let's stick to the previous simple logic:
-    if (text.length > 50 && text.includes('. ')) {
-       return text.split('. ').filter((step: string) => step.trim().length > 0)
     }
     return [text]
 })

@@ -46,7 +46,7 @@ provide(menuKey, {
       <TopNavbar />
 
       <div class="flex h-[calc(100vh-64px)]">
-        <main class="flex-1 flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-hidden">
+        <main class="flex-1 flex flex-col gap-4 p-4 lg:gap-6 lg:p-6 overflow-scroll">
           <div class="flex items-center">
             <h1 class="text-lg font-semibold md:text-2xl">{{ pageData.title }}</h1>
           </div>

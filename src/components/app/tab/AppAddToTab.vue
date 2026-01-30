@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useTabsStore } from '@/stores/loaders/tabs'
 import { useAuthStore } from '@/stores/auth'
+import { useTabSheetStore } from '@/stores/tabSheet'
 import { storeToRefs } from 'pinia'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
@@ -118,6 +119,10 @@ const createNewTab = async () => {
     await tabsStore.getTab(tabId.toString())
     await tabsStore.getTabSplits(tabId.toString())
     mode.value = 'configure-item'
+    
+    // Set as selected in global sheet
+    const tabSheetStore = useTabSheetStore()
+    tabSheetStore.selectedTabId = tabId
   }
 }
 
@@ -136,6 +141,10 @@ const addToTab = async () => {
     specialInstructions: specialInstructions.value,
     splitId: selectedSplitId.value
   })
+
+  // Set the selected tab in the global TabSheet so it's ready when opened
+  const tabSheetStore = useTabSheetStore()
+  tabSheetStore.selectedTabId = currentTab.value.id
 
   isOpen.value = false
 }
